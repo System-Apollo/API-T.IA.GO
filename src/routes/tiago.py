@@ -2,16 +2,20 @@ from flask import Blueprint, request, jsonify
 from time import sleep
 from src.utils.functions.requests.control import adicionar_pergunta_na_fila
 from src.utils.config.extensions import cache
+from flask_jwt_extended import jwt_required
 
 main_bp = Blueprint('main', __name__)
 
 
+
 @main_bp.route('/', methods=['GET'])
+@jwt_required()
 def tela_inicial():
     return jsonify({"mensagem": "Bem-vindo à tela inicial!"}), 200
 
 
 @main_bp.route('/pergunta', methods=['POST'])
+@jwt_required()
 def pergunta():
 
     global df
