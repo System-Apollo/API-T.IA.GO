@@ -1,13 +1,13 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-
+from threading import Thread
 from src.models.token_blocklist import TokenBlocklist
 from src.models.user import User
 from src.routes.auth import auth_bp
 from src.routes.users import user_bp
 from src.routes.tiago import main_bp
 from src.utils.config.extensions import db, jwt, cache
-
+from src.utils.functions.requests.control import processar_fila
 
 
 def create_app():
@@ -69,5 +69,9 @@ def create_app():
         token = db.session.query(TokenBlocklist).filter(TokenBlocklist.jti == jti).scalar()
 
         return token is not None
+
+    thread = Thread(target=processar_fila)
+    thread.daemon = True
+    thread.start()
 
     return app

@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from time import sleep
+
+from src.utils.functions.conversation.question import carregar_dados
 from src.utils.functions.requests.control import adicionar_pergunta_na_fila
 from src.utils.config.extensions import cache
 from flask_jwt_extended import jwt_required
@@ -18,11 +20,14 @@ def tela_inicial():
 @jwt_required()
 def pergunta():
 
-    global df
+    df = carregar_dados('Processos_20240917131041.xlsx')
+
+
     if df is None:
         return jsonify({"erro": "Nenhum arquivo carregado!"}), 400
 
     dados = request.get_json()
+    print(dados)
     pergunta_usuario = dados.get('pergunta', '')
 
     if not pergunta_usuario:
@@ -41,3 +46,4 @@ def pergunta():
 
     resposta_cache = cache.get(pergunta_usuario)
     return jsonify(resposta_cache)
+

@@ -6,6 +6,18 @@ from src.utils.functions.processing.processing import *
 
 historico_conversa = []
 
+
+def carregar_dados(file):
+    df = pd.read_excel(file)
+
+    colunas_data = ['Data de distribuição', 'Data de cadastro', 'Data de citação']
+    print(colunas_data)
+    for coluna in colunas_data:
+        if coluna in df.columns:
+            df[coluna] = pd.to_datetime(df[coluna], format='%d/%m/%Y', errors='coerce')
+
+    return df
+
 def normalizar_pergunta(pergunta):
 
     pergunta = ''.join(
