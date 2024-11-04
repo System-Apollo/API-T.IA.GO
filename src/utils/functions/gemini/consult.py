@@ -1,6 +1,5 @@
 from ratelimit import limits, sleep_and_retry
 import os
-from src.utils.functions.conversation.question import historico_conversa
 import google.generativeai as genai
 
 
@@ -37,6 +36,7 @@ def configurar_gemini():
 def consultar_gemini_conversacional(pergunta, dataframe):
     # Configurar a API do Gemini para conversas genéricas
     configurar_gemini()  # Certifique-se de ter a chave de API do Gemini no seu .env
+    from src.utils.functions.conversation.question import historico_conversa
     model = genai.GenerativeModel("gemini-1.5-pro-001")
 
     palavras_chave = extrair_palavras_chave(pergunta)

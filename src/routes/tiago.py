@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from time import sleep
 from src.utils.functions.requests.control import adicionar_pergunta_na_fila
-from app import cache
+from src.utils.config.extensions import cache
 
 main_bp = Blueprint('main', __name__)
 
