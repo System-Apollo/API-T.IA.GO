@@ -9,31 +9,6 @@ except locale.Error:
     locale.setlocale(locale.LC_ALL, '')
 
 
-# Função para processar o status do caso ou processo de um autor específico
-def processar_status_autor(pergunta, dataframe):
-    pergunta_lower = pergunta.lower().strip()
-    # Extração do nome do autor da pergunta (assumindo nome completo)
-    palavras_pergunta = pergunta_lower.split()
-    nome_autor = None
-
-    # Procurar o nome e sobrenome dentro da pergunta
-    for i in range(len(palavras_pergunta) - 1):
-        possivel_nome = f"{palavras_pergunta[i]} {palavras_pergunta[i + 1]}"
-        if dataframe['Envolvidos - Polo Ativo'].str.contains(possivel_nome, case=False).any():
-            nome_autor = possivel_nome
-            break
-
-    if nome_autor:
-        # Filtrar o dataframe para o nome do autor e buscar o status correspondente
-        status_autor = dataframe[dataframe['Envolvidos - Polo Ativo'].str.contains(nome_autor, case=False)]
-
-        if not status_autor.empty:
-            return f"O status do processo do {nome_autor} é: {status_autor['Status'].values[0]}", {}
-        else:
-            return f"Não foi encontrado nenhum processo ou caso relacionado ao autor {nome_autor}.", {}
-    else:
-        return "Por favor, forneça o nome completo (nome e sobrenome) do autor para que possamos identificar o caso corretamente.", {}
-
 
 def processar_nao_citados(dataframe):
     # Contar processos que ainda não têm data de citação (processos não citados)
@@ -680,16 +655,15 @@ def processar_maior_valor_causa_por_estado(dataframe):
 
 def processar_valor_condenacao_por_estado(dataframe):
     # Converter os valores da coluna 'Total deferido (condenação)' para string e remover 'R$', '.', e ',' para transformar em float
-    dataframe['Total deferido'] = dataframe['Total deferido'].astype(str).str.replace('R$', '',
-                                                                                      regex=False).str.replace('.', '',
-                                                                                                               regex=False).str.replace(
-        ',', '.', regex=False)
+    dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
+                                                                                                          regex=False).str.replace(
+        '.', '', regex=False).str.replace(',', '.', regex=False)
 
     # Converter a coluna para valores numéricos, tratando os erros como NaN
-    dataframe['Total deferido'] = pd.to_numeric(dataframe['Total deferido'], errors='coerce')
+    dataframe['Valor de condenação (R$)'] = pd.to_numeric(dataframe['Valor de condenação (R$)'], errors='coerce')
 
     # Agrupar por estado (coluna 'Foro') e somar os valores
-    soma_por_estado = dataframe.groupby('Foro')['Total deferido'].sum()
+    soma_por_estado = dataframe.groupby('Foro')['Valor de condenação (R$)'].sum()
 
     # Criar a resposta textual, formatando os valores no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = "O valor total de condenações por estado é:\n"
@@ -797,26 +771,26 @@ def processar_sentenca(dataframe, pergunta):
 
 
 def processar_valor_acordo(dataframe):
-    if 'Valor do acordo' in dataframe.columns:
+    if 'Valor de acordo (R$)' in dataframe.columns:
         # Garantir que todos os valores estão no formato de string
-        dataframe['Valor do acordo'] = dataframe['Valor do acordo'].astype(str)
+        dataframe['Valor de acordo (R$)'] = dataframe['Valor de acordo (R$)'].astype(str)
 
         # Remover símbolos de moeda e converter valores para numéricos
-        dataframe['Valor do acordo'] = (
-            dataframe['Valor do acordo']
+        dataframe['Valor de acordo (R$)'] = (
+            dataframe['Valor de acordo (R$)']
             .str.replace('R$', '', regex=False)  # Remover o símbolo 'R$'
             .str.replace('.', '', regex=False)  # Remover os pontos dos milhares
             .str.replace(',', '.', regex=False)  # Substituir vírgula por ponto para decimal
         )
 
         # Converter os valores da coluna para numéricos
-        dataframe['Valor do acordo'] = pd.to_numeric(dataframe['Valor do acordo'], errors='coerce')
+        dataframe['Valor de acordo (R$)'] = pd.to_numeric(dataframe['Valor de acordo (R$)'], errors='coerce')
 
         # Somar os valores, ignorando os NaN
-        valor_total_acordo = dataframe['Valor do acordo'].sum()
+        valor_total_acordo = dataframe['Valor de acordo (R$)'].sum()
 
         # Contar quantos valores de acordo existem (sem contar valores 0)
-        quantidade_acordos = dataframe[dataframe['Valor do acordo'] > 0]['Valor do acordo'].count()
+        quantidade_acordos = dataframe[dataframe['Valor de acordo (R$)'] > 0]['Valor de acordo (R$)'].count()
 
         # Preparar dados para gráfico (quantidade e valor total), convertendo para tipos JSON-serializáveis
         grafico_data = {

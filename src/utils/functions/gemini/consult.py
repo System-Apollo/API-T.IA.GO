@@ -11,17 +11,26 @@ RPD = 800  # 50 requisições por dia
 def contar_tokens(texto):
     return len(texto.split())
 
-def extrair_palavras_chave(pergunta):
-    # Exemplo de lista de palavras-chave que podem estar relacionadas às perguntas
-    palavras_chave = ["valor", "estado", "condenação", "processo", "comarca", "rito", "benefício", "economia", "idade"]
 
-    # Verificar se as palavras-chave aparecem na pergunta
-    return [palavra for palavra in palavras_chave if palavra in pergunta.lower()]
+def filtrar_dataframe(pergunta, dataframe):
+    # Extrair o nome do autor da pergunta, por exemplo, "Tassio"
+    palavras_chave = pergunta.split()
+    # Tentar filtrar pela coluna "Envolvidos - Polo Ativo" para encontrar o nome do autor
+    if 'Envolvidos - Polo Ativo' in dataframe.columns:
+        # Filtrar DataFrame com base na coluna "Envolvidos - Polo Ativo"
+        df_filtrado = dataframe[
+            dataframe['Envolvidos - Polo Ativo'].str.contains('|'.join(palavras_chave), case=False, na=False)]
 
-
-def filtrar_dataframe_por_palavras_chave(dataframe, palavras_chave):
-    filtro = dataframe.apply(lambda row: any(palavra in row.to_string().lower() for palavra in palavras_chave), axis=1)
-    return dataframe[filtro]
+        # Se houver dados filtrados, reduzir o número de colunas para as mais relevantes
+        if not df_filtrado.empty:
+            colunas_relevantes = ['Número CNJ', 'Data da distribuição', 'Status',
+                                  'Última mov.']  # Ajuste conforme necessário
+            df_filtrado = df_filtrado[colunas_relevantes]
+        else:
+            return None  # Se não encontrar, retorna None
+    else:
+        return None  # Se não houver a coluna "Envolvidos - Polo Ativo"
+    return df_filtrado
 
 
 # Configurar a API do Gemini
@@ -39,12 +48,11 @@ def consultar_gemini_conversacional(pergunta, dataframe):
     from src.utils.functions.conversation.question import historico_conversa
     model = genai.GenerativeModel("gemini-1.5-pro-001")
 
-    palavras_chave = extrair_palavras_chave(pergunta)
-    df_filtrado = filtrar_dataframe_por_palavras_chave(dataframe, palavras_chave)
-    contexto = df_filtrado.to_string(index=False)
+    dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
+    contexto = dataframe_filtrado.to_string(index=False)
     contexto_conversa = "\n".join([f"{msg['Usuário']}: {msg['TIAGO']}" for msg in historico_conversa[-5:]])
     prompt = (f"Contexto da conversa:\n{contexto_conversa}"
-              f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\nConverse com o usuário e responda de maneira amigável e educada, nao me traga emojis: {pergunta}")
+              f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\nConverse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
 
     tokens_enviados = contar_tokens(prompt)
     print(f"Tokens enviados: {tokens_enviados}")

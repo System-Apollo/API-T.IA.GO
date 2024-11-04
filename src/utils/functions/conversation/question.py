@@ -10,8 +10,29 @@ historico_conversa = []
 def carregar_dados(file):
     df = pd.read_excel(file)
 
-    colunas_data = ['Data de distribuição', 'Data de cadastro', 'Data de citação']
-    print(colunas_data)
+    colunas_data = [
+        'Data da distribuição',
+        'Data da sentença',
+        'Data do acordo',
+        'Data Apólice',
+        'Data do arquivamento',
+        'Data do primeiro acórdão',
+        'Data do trânsito em julgado',
+        'Data do Última mov.',
+        'TST - Data do primeiro acórdão',
+        'TST - Data do trânsito em julgado',
+        'Data de Audiência',
+        'Data de Contestação',
+        'Data de Contestação',
+        'Data de recurso',
+        'Data do acórdão',
+        'Data de Sessão de Julgamento',
+        'Data da última audiência realizada',
+        'Data da próxima audiência',
+        'Data do último recurso apresentado',
+    ]
+
+
     for coluna in colunas_data:
         if coluna in df.columns:
             df[coluna] = pd.to_datetime(df[coluna], format='%d/%m/%Y', errors='coerce')
@@ -33,11 +54,6 @@ def remover_acentos(texto):
 def processar_pergunta(pergunta, dataframe):
 
     pergunta_normalizada = normalizar_pergunta(pergunta)
-    greetings = ["olá", "como você está", "oi", "bom dia", "boa tarde", "boa noite", "tudo bem"]
-    if any(greeting in pergunta_normalizada.lower() for greeting in greetings):
-        resposta_texto = "Como posso te ajudar hoje?"
-        historico_conversa.append({"Usuário": pergunta, "TIAGO": resposta_texto})
-        return resposta_texto, {}
 
     for categoria, padroes in categoria_perguntas.items():
         for padrao in padroes:
@@ -118,10 +134,6 @@ def processar_pergunta(pergunta, dataframe):
                 elif categoria == 'processo_mais_antigo':
                     return consultar_gemini_conversacional(pergunta,
                                                            dataframe), "Para encontrar o processo mais antigo, verifique a data de distribuição mais antiga no banco de dados."
-
-
-                historico_conversa.append({"Usuário": pergunta, "TIAGO": "resposta_texto"})
-                return "resposta_texto", {}
 
 
     chatgemini_resposta = consultar_gemini_conversacional(pergunta, dataframe)
