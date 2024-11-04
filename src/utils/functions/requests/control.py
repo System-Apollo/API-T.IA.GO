@@ -1,7 +1,6 @@
 import queue
 from time import sleep, time
 from src.utils.functions.conversation.question import processar_pergunta
-from src.utils.config.extensions import cache
 
 fila_de_requisicoes = queue.Queue()
 limite_por_minuto = 4
@@ -47,7 +46,6 @@ def processar_fila():
         controlar_taxa()  # Controlar a taxa antes de processar a requisição
         resposta_texto, grafico_data = processar_pergunta(pergunta, dataframe)
         fila_de_requisicoes.task_done()  # Marcar como finalizada
-        cache.set(pergunta, {"resposta": resposta_texto, "grafico": grafico_data})  # Armazenar no cache
 
 
 def adicionar_pergunta_na_fila(pergunta, dataframe):

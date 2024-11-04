@@ -6,7 +6,7 @@ from src.models.user import User
 from src.routes.auth import auth_bp
 from src.routes.users import user_bp
 from src.routes.tiago import main_bp
-from src.utils.config.extensions import db, jwt, cache
+from src.utils.config.extensions import db, jwt 
 from src.utils.functions.requests.control import processar_fila
 
 
@@ -15,7 +15,6 @@ def create_app():
     CORS(app)
 
     app.config.from_prefixed_env()
-    cache.init_app(app)
 
     db.init_app(app)
     jwt.init_app(app)

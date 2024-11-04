@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import locale
+from datetime import datetime
 
 
 try:
@@ -173,12 +174,12 @@ def processar_sentencas_procedentes(dataframe):
 
 def processar_media_duracao_por_estado(dataframe):
     # Converter as colunas 'Última mov.' e 'Data de distribuição' para datetime, corrigindo o formato
-    dataframe['Última mov.'] = pd.to_datetime(dataframe['Última mov.'], format='%d/%m/%Y', errors='coerce')
-    dataframe['Data de distribuição'] = pd.to_datetime(dataframe['Data de distribuição'], format='%d/%m/%Y',
+    dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y',
                                                        errors='coerce')
 
     # Calcular a duração do processo (diferença entre 'Última mov.' e 'Data de distribuição')
-    dataframe['Duração'] = (dataframe['Última mov.'] - dataframe['Data de distribuição']).dt.days
+    dataframe['Duração'] = (dataframe['Data do Última mov.'] - dataframe['Data da distribuição']).dt.days
 
     # Remover valores de duração inválidos (NaN)
     dataframe = dataframe.dropna(subset=['Duração'])
@@ -207,12 +208,12 @@ def processar_media_duracao_por_estado(dataframe):
 
 def processar_media_duracao_por_comarca(dataframe):
     # Converter as colunas 'Última mov.' e 'Data de distribuição' para datetime, corrigindo o formato
-    dataframe['Última mov.'] = pd.to_datetime(dataframe['Última mov.'], format='%d/%m/%Y', errors='coerce')
-    dataframe['Data de distribuição'] = pd.to_datetime(dataframe['Data de distribuição'], format='%d/%m/%Y',
+    dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y',
                                                        errors='coerce')
 
     # Calcular a duração do processo (diferença entre 'Última mov.' e 'Data de distribuição')
-    dataframe['Duração'] = (dataframe['Última mov.'] - dataframe['Data de distribuição']).dt.days
+    dataframe['Duração'] = (dataframe['Data do Última mov.'] - dataframe['Data da distribuição']).dt.days
 
     # Remover valores de duração inválidos (NaN)
     dataframe = dataframe.dropna(subset=['Duração'])
@@ -282,11 +283,11 @@ def processar_comarca_mais_preocupante(dataframe):
     dataframe['Comarca'] = dataframe['Foro'].apply(extrair_comarca)
 
     # Verificar se a coluna 'Total deferido' contém valores não-string e converter para string se necessário
-    dataframe['Total deferido'] = dataframe['Total deferido'].apply(lambda x: str(x) if pd.notnull(x) else x)
+    dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].apply(lambda x: str(x) if pd.notnull(x) else x)
 
     # Limpar e converter a coluna 'Total deferido' para float, tratando os valores corretamente
-    dataframe['Total deferido'] = pd.to_numeric(
-        dataframe['Total deferido']
+    dataframe['Valor de condenação (R$)'] = pd.to_numeric(
+        dataframe['Valor de condenação (R$)']
         .str.replace('R$', '', regex=False)
         .str.replace('.', '', regex=False)
         .str.replace(',', '.', regex=False),
@@ -294,7 +295,7 @@ def processar_comarca_mais_preocupante(dataframe):
     )
 
     # Agrupar por comarca e somar os valores de condenação
-    valor_condenacao_por_comarca = dataframe.groupby('Comarca')['Total deferido'].sum()
+    valor_condenacao_por_comarca = dataframe.groupby('Comarca')['Valor de condenação (R$)'].sum()
 
     # Verificar qual comarca tem o maior valor de condenação
     comarca_mais_preocupante = valor_condenacao_por_comarca.idxmax()
@@ -311,16 +312,16 @@ def processar_comarca_mais_preocupante(dataframe):
 
 def processar_estado_mais_ofensor(dataframe):
     # Garantir que todos os valores na coluna 'Total deferido' sejam strings antes de aplicar as substituições
-    dataframe['Total deferido'] = dataframe['Total deferido'].astype(str).str.replace('R$', '',
+    dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
                                                                                       regex=False).str.replace('.', '',
                                                                                                                regex=False).str.replace(
         ',', '.', regex=False)
 
     # Converter para float
-    dataframe['Total deferido'] = pd.to_numeric(dataframe['Total deferido'], errors='coerce')
+    dataframe['Valor de condenação (R$)'] = pd.to_numeric(dataframe['Valor de condenação (R$)'], errors='coerce')
 
     # Agrupar por estado (Foro) e somar os valores de condenação
-    valor_condenacao_por_estado = dataframe.groupby('Foro')['Total deferido'].sum()
+    valor_condenacao_por_estado = dataframe.groupby('Foro')['Valor de condenação (R$)'].sum()
 
     # Verificar qual estado tem o maior valor de condenação
     estado_mais_preocupante = valor_condenacao_por_estado.idxmax()
@@ -425,13 +426,13 @@ def abreviar_assuntos(assunto):
 # Função para processar a quantidade de recursos interpostos
 def processar_quantidade_recursos(dataframe):
     # Remover espaços extras e converter para minúsculas para evitar problemas de formatação
-    dataframe['Tipo de Recurso'] = dataframe['Tipo de Recurso'].str.strip().str.lower()
+    dataframe['Tipos de recursos'] = dataframe['Tipos de recursos'].str.strip().str.lower()
 
     # Contar os processos com recursos (diferentes de '-')
-    recursos_interpostos = dataframe[dataframe['Tipo de Recurso'] != '-'].shape[0]
+    recursos_interpostos = dataframe[dataframe['Tipos de recursos'] != '-'].shape[0]
 
     # Contar os processos sem recursos
-    sem_recursos = dataframe[dataframe['Tipo de Recurso'] == '-'].shape[0]
+    sem_recursos = dataframe[dataframe['Tipos de recursos'] == '-'].shape[0]
 
     # Retornar a resposta com a quantidade de recursos interpostos e os dados para o gráfico
     return f"Foram interpostos {recursos_interpostos} recursos, e {sem_recursos} processos não têm recurso.", {
@@ -502,7 +503,7 @@ def processar_quantidade_processos(dataframe):
 # Função auxiliar para processar perguntas sobre "Data de Trânsito em Julgado"
 def processar_transito_julgado(dataframe):
     # Verificar quais células da coluna 'Data de Trânsito em Julgado' têm data e quais estão vazias
-    transitado = dataframe['Data de Trânsito em Julgado'].notna() & dataframe['Data de Trânsito em Julgado'].apply(
+    transitado = dataframe['Data do trânsito em julgado'].notna() & dataframe['Data do trânsito em julgado'].apply(
         lambda x: str(x).strip() != '-')
     processos_transitados = int(transitado.sum())  # Converte para tipo int nativo
     processos_nao_transitados = int((~transitado).sum())  # Converte para tipo int nativo
@@ -563,8 +564,8 @@ def processar_sentenca(dataframe, pergunta):
 # Função para processar o valor total da causa
 def processar_valor_total_causa(dataframe):
     # Converter a coluna 'Total da causa' para string e depois para valores numéricos (removendo símbolos de moeda e ajustando formatação)
-    dataframe['Total da causa'] = pd.to_numeric(
-        dataframe['Total da causa']
+    dataframe['Valor de causa (R$)'] = pd.to_numeric(
+        dataframe['Valor de causa (R$)']
         .astype(str)  # Converte todos os valores da coluna para string
         .str.replace('R$', '', regex=False)
         .str.replace('.', '', regex=False)
@@ -572,11 +573,11 @@ def processar_valor_total_causa(dataframe):
     )
 
     # Somar o valor total da causa para todos os processos
-    valor_total_causa = dataframe['Total da causa'].sum()
+    valor_total_causa = dataframe['Valor de causa (R$)'].sum()
 
     # Dividir o total por status (ativo e arquivado)
-    total_ativos = dataframe[dataframe['Status'].str.lower() == 'ativo']['Total da causa'].sum()
-    total_arquivados = dataframe[dataframe['Status'].str.lower() == 'arquivado']['Total da causa'].sum()
+    total_ativos = dataframe[dataframe['Status'].str.lower() == 'ativo']['Valor de causa (R$)'].sum()
+    total_arquivados = dataframe[dataframe['Status'].str.lower() == 'arquivado']['Valor de causa (R$)'].sum()
 
     # Formatar os valores no padrão brasileiro
     valor_total_causa_formatado = f"{valor_total_causa:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
@@ -597,20 +598,23 @@ def processar_valor_total_causa(dataframe):
 
 def processar_media_valor_causa_por_estado(dataframe):
     # Verificar se a coluna "Total da causa" é do tipo string e, se não for, converter para string
-    if dataframe['Total da causa'].dtype != 'object':
-        dataframe['Total da causa'] = dataframe['Total da causa'].astype(str)
+    if dataframe['Valor de causa (R$)'].dtype != 'object':
+        dataframe['Valor de causa (R$)'] = dataframe['Valor de causa (R$)'].astype(str)
 
-    # Limpar e converter os valores na coluna "Total da causa"
-    dataframe['Total da causa'] = pd.to_numeric(
-        dataframe['Total da causa']
+    # Limpar e converter os valores na coluna "Valor de causa (R$)"
+    dataframe['Valor de causa (R$)'] = pd.to_numeric(
+        dataframe['Valor de causa (R$)']
         .str.replace('R$', '', regex=False)
         .str.replace('.', '', regex=False)
         .str.replace(',', '.', regex=False),
         errors='coerce'
     )
 
-    # Agrupar por estado (coluna Foro) e calcular a média
-    media_valor_por_estado = dataframe.groupby('Foro')['Total da causa'].mean().dropna()
+    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
+    dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
+
+    # Agrupar por estado e calcular a média
+    media_valor_por_estado = dataframe.groupby('Estado')['Valor de causa (R$)'].mean().dropna()
 
     # Encontrar o estado com a maior média
     estado_maior_media = media_valor_por_estado.idxmax()
@@ -628,33 +632,33 @@ def processar_media_valor_causa_por_estado(dataframe):
 
 def processar_maior_valor_causa_por_estado(dataframe):
     # Converter a coluna 'Total da causa' para string, limpar e converter para float
-    dataframe['Total da causa'] = dataframe['Total da causa'].astype(str).str.replace('R$', '',
-                                                                                      regex=False).str.replace('.', '',
-                                                                                                               regex=False).str.replace(
-        ',', '.', regex=False)
+    dataframe['Total da causa'] = dataframe['Total da causa'].astype(str).str.replace('R$', '', regex=False)\
+        .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
 
     # Converter para numérico, tratando erros como NaN
     dataframe['Total da causa'] = pd.to_numeric(dataframe['Total da causa'], errors='coerce')
 
-    # Agrupar por estado (coluna 'Foro') e somar os valores de 'Total da causa'
-    soma_por_estado = dataframe.groupby('Foro')['Total da causa'].sum()
+    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
+    dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
+
+    # Agrupar por estado e somar os valores de 'Total da causa'
+    soma_por_estado = dataframe.groupby('Estado')['Total da causa'].sum()
 
     # Encontrar o estado com o maior valor de causa
     estado_com_maior_valor = soma_por_estado.idxmax()
     maior_valor = soma_por_estado.max()
 
-    # Criar a resposta textual, formatando o valor no estilo brasileiro (R$ X.XXX.XXX,XX)
+    # Criar a resposta textual, formatando o valor no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = f"O estado com o maior valor de causa é {estado_com_maior_valor}, com um total de R$ {maior_valor:,.2f}".replace(
         ',', 'X').replace('.', ',').replace('X', '.')
 
-    # Retornar os dados em um formato serializável para o gráfico
+     # Retornar os dados em um formato serializável para o gráfico
     return resposta_texto, {
         "valor_causa_por_estado": soma_por_estado.to_dict()
     }
 
-
 def processar_valor_condenacao_por_estado(dataframe):
-    # Converter os valores da coluna 'Total deferido (condenação)' para string e remover 'R$', '.', e ',' para transformar em float
+    # Converter os valores da coluna 'Valor de condenação (R$)' para string e remover 'R$', '.', e ',' para transformar em float
     dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
                                                                                                           regex=False).str.replace(
         '.', '', regex=False).str.replace(',', '.', regex=False)
@@ -662,18 +666,23 @@ def processar_valor_condenacao_por_estado(dataframe):
     # Converter a coluna para valores numéricos, tratando os erros como NaN
     dataframe['Valor de condenação (R$)'] = pd.to_numeric(dataframe['Valor de condenação (R$)'], errors='coerce')
 
-    # Agrupar por estado (coluna 'Foro') e somar os valores
-    soma_por_estado = dataframe.groupby('Foro')['Valor de condenação (R$)'].sum()
+    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
+    dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
+
+    # Agrupar por estado e somar os valores
+    soma_por_estado = dataframe.groupby('Estado')['Valor de condenação (R$)'].sum()
 
     # Criar a resposta textual, formatando os valores no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = "O valor total de condenações por estado é:\n"
     resposta_texto += "\n".join(
         [f"{estado}: R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for estado, valor in
          soma_por_estado.items()])
+    
     # Retornar os dados em um formato serializável para o gráfico
     return resposta_texto, {
         "condenacao_por_estado": soma_por_estado.to_dict()  # Retorna um dicionário com os valores para o gráfico
     }
+    
 
 
 # Função auxiliar para processar perguntas sobre status (ativos, arquivados, etc.)
@@ -747,6 +756,9 @@ def processar_fase(dataframe, pergunta=None):
 
 # Função auxiliar para processar perguntas sobre "Resultado da Sentença"
 def processar_sentenca(dataframe, pergunta):
+    # Verificar se a coluna 'Resultado da Sentença' existe no DataFrame
+    if 'Resultado da Sentença' not in dataframe.columns:
+        return "Erro: A coluna 'Resultado da Sentença' não foi encontrada no arquivo de dados.", {}
     # Contar a ocorrência dos diferentes resultados de sentença, normalizando para lowercase
     sentencas = dataframe['Resultado da Sentença'].str.lower().value_counts().to_dict()
 
@@ -885,3 +897,51 @@ def processar_semana(dataframe, coluna, pergunta):
 
     # Caso não identifique a semana corretamente, retornar mensagem padrão
     return f"Não foi possível identificar a semana especificada.", {}
+
+def tratar_pergunta_proximas_audiencias(dataframe):
+    # Supondo que o dataframe tenha uma coluna chamada 'Data da Audiência' com as datas das audiências
+    # Vamos converter as datas para o formato datetime
+    dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
+
+    # Filtrar as audiências que são futuras (a partir da data de hoje)
+    hoje = datetime.now()
+    proximas_audiencias = dataframe[dataframe['Data de Audiência'] >= hoje]
+
+    # Ordenar pela Data de Audiência
+    proximas_audiencias = proximas_audiencias.sort_values(by='Data de Audiência')
+
+    # Se houver audiências futuras
+    if not proximas_audiencias.empty:
+        resposta = "Verificando os dados encontrei:\n"
+        for _, row in proximas_audiencias.iterrows():
+            data_audiencia = row['Data de Audiência'].strftime('%d/%m/%Y')
+            processo = row['Número CNJ']
+            local = row['Foro']
+            resposta += f"\n - Processo {processo} no foro {local} em {data_audiencia}\n"
+    else:
+        resposta = "Você não tem audiências futuras agendadas."
+
+    # Retornar a resposta
+    return resposta,{}
+
+def processar_processo_mais_antigo(dataframe):
+    # Converter a coluna 'Data da Distribuição' para o tipo datetime, ignorando erros de conversão
+    dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], errors='coerce', format='%d/%m/%Y')
+
+    # Remover linhas com valores de data inválidos (NaT)
+    dataframe = dataframe.dropna(subset=['Data da distribuição'])
+
+    # Encontrar a data mínima na coluna 'Data da distribuição'
+    data_mais_antiga = dataframe['Data da distribuição'].min()
+
+    # Selecionar o processo correspondente à data mais antiga
+    processo_mais_antigo = dataframe[dataframe['Data da distribuição'] == data_mais_antiga]
+
+    # Verificar se o dataframe resultante tem algum valor
+    if not processo_mais_antigo.empty:
+        # Supondo que a coluna do processo seja chamada 'Numero do Processo'
+        numero_processo_mais_antigo = processo_mais_antigo['Número CNJ'].values[0]
+        data_processo = data_mais_antiga.strftime('%d/%m/%Y')
+        return f"O processo mais antigo é o número {numero_processo_mais_antigo}, distribuído em {data_processo}."
+    else:
+        return "Nenhum processo encontrado com uma data válida."

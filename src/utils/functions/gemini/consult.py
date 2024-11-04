@@ -24,7 +24,7 @@ def filtrar_dataframe(pergunta, dataframe):
         # Se houver dados filtrados, reduzir o número de colunas para as mais relevantes
         if not df_filtrado.empty:
             colunas_relevantes = ['Número CNJ', 'Data da distribuição', 'Status',
-                                  'Última mov.']  # Ajuste conforme necessário
+                                  'Data do Última mov.']  # Ajuste conforme necessário
             df_filtrado = df_filtrado[colunas_relevantes]
         else:
             return None  # Se não encontrar, retorna None
@@ -48,11 +48,24 @@ def consultar_gemini_conversacional(pergunta, dataframe):
     from src.utils.functions.conversation.question import historico_conversa
     model = genai.GenerativeModel("gemini-1.5-pro-001")
 
+    # Filtrar o DataFrame com base na pergunta
     dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
+    
+    # Verificar se o dataframe filtrado é None
+    if dataframe_filtrado is None:
+        # Retornar uma resposta amigável caso não encontre dados relevantes
+        return "Desculpe, não encontrei dados relevantes com base na sua pergunta."
+
+    # Gerar o contexto do dataframe filtrado
     contexto = dataframe_filtrado.to_string(index=False)
+    
+    # Gerar o contexto da conversa
     contexto_conversa = "\n".join([f"{msg['Usuário']}: {msg['TIAGO']}" for msg in historico_conversa[-5:]])
-    prompt = (f"Contexto da conversa:\n{contexto_conversa}"
-              f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\nConverse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
+
+    # Criar o prompt
+    prompt = (f"Contexto da conversa:\n{contexto_conversa}\n"
+              f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\n"
+              f"Converse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
 
     tokens_enviados = contar_tokens(prompt)
     print(f"Tokens enviados: {tokens_enviados}")
