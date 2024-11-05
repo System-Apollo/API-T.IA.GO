@@ -42,40 +42,36 @@ def configurar_gemini():
 @sleep_and_retry
 @limits(calls=RPM, period=60)
 @limits(calls=RPD, period=86400)
-def consultar_gemini_conversacional(pergunta, dataframe):
-    # Configurar a API do Gemini para conversas genéricas
-    configurar_gemini()  # Certifique-se de ter a chave de API do Gemini no seu .env
+def consultar_gemini_conversacional(pergunta, dataframe, user_id):
+
     from src.utils.functions.conversation.question import historico_conversa
+
+    configurar_gemini()
     model = genai.GenerativeModel("gemini-1.5-pro-001")
 
-    # Filtrar o DataFrame com base na pergunta
+
     dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
-    
-    # Verificar se o dataframe filtrado é None
+
     if dataframe_filtrado is None:
-        # Retornar uma resposta amigável caso não encontre dados relevantes
         return "Desculpe, não encontrei dados relevantes com base na sua pergunta."
 
-    # Gerar o contexto do dataframe filtrado
     contexto = dataframe_filtrado.to_string(index=False)
-    
-    # Gerar o contexto da conversa
-    contexto_conversa = "\n".join([f"{msg['Usuário']}: {msg['TIAGO']}" for msg in historico_conversa[-5:]])
 
-    # Criar o prompt
+
+    historico_usuario = historico_conversa.get(user_id, [])
+
+    if historico_usuario:
+        contexto_conversa = "\n".join([f"{msg['pergunta']}: {msg['resposta_tiago']}" for msg in historico_usuario[-5:]])
+    else:
+        contexto_conversa = "Nenhum histórico de conversa disponível."
+
     prompt = (f"Contexto da conversa:\n{contexto_conversa}\n"
               f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\n"
               f"Converse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
 
-    tokens_enviados = contar_tokens(prompt)
-    print(f"Tokens enviados: {tokens_enviados}")
-
     try:
-        # Enviar a pergunta para o Gemini e obter uma resposta
         response = model.generate_content(prompt)
-        tokens_recebidos = contar_tokens(response.text)
-        print(f"Tokens recebidos: {tokens_recebidos}")
-        return response.text.strip()  # Retorna a resposta como string limpa
+        return response.text.strip()
     except Exception as e:
         print(f"Erro ao consultar a API do Gemini: {e}")
         return "Desculpe, ainda estou aprimorando minha base de conhecimento. Tente novamente em alguns instantes."

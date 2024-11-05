@@ -50,29 +50,28 @@ def normalizar_pergunta(pergunta):
 def remover_acentos(texto):
     return ''.join(c for c in unicodedata.normalize('NFKD', texto) if not unicodedata.combining(c))
 
+
 def processar_pergunta(pergunta, dataframe, user_id):
-
     pergunta_normalizada = normalizar_pergunta(pergunta)
-
-    # Verificar se o usuário já possui algum histórico de conversas, caso contrário, inicializa
+    grafico_data = None
     if user_id not in historico_conversa:
         historico_conversa[user_id] = []
 
     for categoria, padroes in categoria_perguntas.items():
         for padrao in padroes:
             if re.search(padrao, pergunta_normalizada, re.IGNORECASE):
-
-                #Processar as perguntas de acordo com a sua categoria
                 resultado = processar_categoria(categoria, dataframe, pergunta)
 
-                #Armazenando a interação no objeto de histórico da conversa
                 historico_conversa[user_id].append({"pergunta": pergunta, "resposta_tiago": resultado})
-                return resultado
 
-    chatgemini_resposta = consultar_gemini_conversacional(pergunta, dataframe)
+                return resultado, grafico_data
+
+
+    chatgemini_resposta = consultar_gemini_conversacional(pergunta, dataframe, user_id)
 
     historico_conversa[user_id].append({"pergunta": pergunta, "resposta_tiago": chatgemini_resposta})
-    return chatgemini_resposta
+
+    return chatgemini_resposta, grafico_data
 
 def processar_categoria(categoria, dataframe, pergunta):
     if categoria == 'valor_total_acordos':
