@@ -38,6 +38,14 @@ def create_app():
 
         return {"is_staff": False}
 
+    @jwt.additional_claims_loader
+    def add_user_claims_to_jwt(identity):
+        user = User.query.filter_by(username=identity).one_or_none()
+        if user is None:
+            return {}
+
+        return {"user_id": user.id}
+
     @jwt.expired_token_loader
     def expired_token_callback(_jwt_header, jwt_data):
         return jsonify({"message": "Token expired", "error": "token_expired"}), 401

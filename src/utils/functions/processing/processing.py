@@ -925,7 +925,7 @@ def tratar_pergunta_proximas_audiencias(dataframe):
     return resposta,{}
 
 def processar_processo_mais_antigo(dataframe):
-    # Converter a coluna 'Data da Distribuição' para o tipo datetime, ignorando erros de conversão
+    # Converter a coluna 'Data da distribuição' para o tipo datetime, ignorando erros de conversão
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], errors='coerce', format='%d/%m/%Y')
 
     # Remover linhas com valores de data inválidos (NaT)
@@ -939,9 +939,17 @@ def processar_processo_mais_antigo(dataframe):
 
     # Verificar se o dataframe resultante tem algum valor
     if not processo_mais_antigo.empty:
-        # Supondo que a coluna do processo seja chamada 'Numero do Processo'
+        # Supondo que a coluna do processo seja chamada 'Número CNJ'
         numero_processo_mais_antigo = processo_mais_antigo['Número CNJ'].values[0]
         data_processo = data_mais_antiga.strftime('%d/%m/%Y')
-        return f"O processo mais antigo é o número {numero_processo_mais_antigo}, distribuído em {data_processo}."
+
+        # Resposta textual
+        resposta = f"O processo mais antigo é o número {numero_processo_mais_antigo}, distribuído em {data_processo}."
+
+        # Dados para gráfico (nesse caso, vazio)
+        grafico_data = {}
+
+        return resposta, grafico_data
     else:
-        return "Nenhum processo encontrado com uma data válida."
+        resposta = "Nenhum processo encontrado com uma data válida."
+        return resposta, {}
