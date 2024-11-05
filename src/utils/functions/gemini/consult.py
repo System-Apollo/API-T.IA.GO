@@ -68,9 +68,12 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
     prompt = (f"Contexto da conversa:\n{contexto_conversa}\n"
               f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\n"
               f"Converse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
-
+    tokens_enviados = contar_tokens(prompt)
+    print(f"Tokens enviados: {tokens_enviados}")
     try:
         response = model.generate_content(prompt)
+        tokens_recebidos = contar_tokens(response.text)
+        print(f"Tokens recebidos: {tokens_recebidos}")
         return response.text.strip()
     except Exception as e:
         print(f"Erro ao consultar a API do Gemini: {e}")

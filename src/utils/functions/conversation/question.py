@@ -60,15 +60,18 @@ def processar_pergunta(pergunta, dataframe, user_id):
     for categoria, padroes in categoria_perguntas.items():
         for padrao in padroes:
             if re.search(padrao, pergunta_normalizada, re.IGNORECASE):
-                resultado = processar_categoria(categoria, dataframe, pergunta)
+                resultado, grafico_data = processar_categoria(categoria, dataframe, pergunta)
 
+                # Adicionar a pergunta e a resposta no histórico
                 historico_conversa[user_id].append({"pergunta": pergunta, "resposta_tiago": resultado})
 
+                # Retornar o texto da resposta e os dados do gráfico (se houver)
                 return resultado, grafico_data
 
-
+    # Caso não encontre uma categoria, utilizar a API de conversação
     chatgemini_resposta = consultar_gemini_conversacional(pergunta, dataframe, user_id)
 
+    # Adicionar ao histórico
     historico_conversa[user_id].append({"pergunta": pergunta, "resposta_tiago": chatgemini_resposta})
 
     return chatgemini_resposta, grafico_data
@@ -78,14 +81,16 @@ def processar_categoria(categoria, dataframe, pergunta):
         return processar_valor_acordo(dataframe)
     elif categoria == 'valor_condenacao_estado':
         return processar_valor_condenacao_por_estado(dataframe)
+    elif categoria == 'divisao_resultados_processos':
+        return processar_sentenca(dataframe, pergunta)
     elif categoria == 'estado_maior_valor_causa':
         return processar_maior_valor_causa_por_estado(dataframe)
     elif categoria == 'estado_maior_media_valor_causa':
         return processar_media_valor_causa_por_estado(dataframe)
-    elif categoria == 'divisao_resultados_processos':
-        return processar_sentenca(dataframe, pergunta)
     elif categoria == 'transitaram_julgado':
         return processar_transito_julgado(dataframe)
+    elif categoria == 'prox_audiencia':
+        return tratar_pergunta_proximas_audiencias(dataframe)
     elif categoria == 'quantidade_processos_estado':
         return processar_quantidade_processos_por_estado(dataframe)
     elif categoria == 'quantidade_processos_comarca':
@@ -116,18 +121,6 @@ def processar_categoria(categoria, dataframe, pergunta):
         return processar_estado_mais_ofensor(dataframe)
     elif categoria == 'comarca_mais_ofensora':
         return processar_comarca_mais_preocupante(dataframe)
-    elif categoria == 'melhor_estrategia':
-        return consultar_gemini_conversacional(pergunta,
-                                               dataframe), "Essa pergunta envolve uma análise mais detalhada e política de acordo. Por favor, entre em contato com o setor responsável."
-    elif categoria == 'beneficio_economico_carteira':
-        return consultar_gemini_conversacional(pergunta,
-                                               dataframe), "Para calcular o benefício econômico, subtraia o valor da condenação do valor da causa."
-    elif categoria == 'beneficio_economico_estado':
-        return consultar_gemini_conversacional(pergunta,
-                                               dataframe), "Para calcular o benefício econômico por estado, subtraia o valor da condenação pelo valor da causa em cada estado."
-    elif categoria == 'idade_carteira':
-        return consultar_gemini_conversacional(pergunta,
-                                               dataframe), "Para determinar a idade da carteira, consulte os dados de abertura e finalização dos processos."
     elif categoria == 'maior_media_duracao_estado':
         return processar_media_duracao_por_estado(dataframe)
     elif categoria == 'maior_media_duracao_comarca':
@@ -147,5 +140,4 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'processos_nao_citados':
         return processar_nao_citados(dataframe)
     elif categoria == 'processo_mais_antigo':
-        return consultar_gemini_conversacional(pergunta,
-                                               dataframe), "Para encontrar o processo mais antigo, verifique a data de distribuição mais antiga no banco de dados."
+        return processar_processo_mais_antigo(dataframe) 
