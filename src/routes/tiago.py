@@ -19,25 +19,20 @@ def pergunta():
     claims = get_jwt()
     user_id = claims.get('user_id')
 
-    if user_id == '246e935b-69f3-4cc3-a334-ca4ca81ab220':
+    if user_id == '6e389795-cfb3-4e19-8c77-2e00fcc0634a':
         
         # Carregar os dados
         df = carregar_dados('dados_falsos_processos_completos.xlsx')
         
-    elif user_id == '27439701-947e-4a8e-83c8-66fc175db104':
+    elif user_id == '22222':
         # Carregar os dados
         df = carregar_dados('dados_user2.xlsx')
-        
-    elif user_id == '':
-        # Carregar os dados
-        df = carregar_dados('')
-        
-    elif user_id == '':
-        # Carregar os dados
-        df = carregar_dados('')
 
-    if df is None:
-        return jsonify({"erro": "Nenhum arquivo carregado!"}), 400
+    else:
+        return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"})
+
+    # if df is None:
+    #     return jsonify({"erro": "Nenhum arquivo carregado!"}), 400
 
     # Pegar os dados da requisição
     dados = request.get_json()
