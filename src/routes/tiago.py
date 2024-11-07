@@ -17,10 +17,9 @@ def tela_inicial():
 @jwt_required()
 def pergunta():
     claims = get_jwt()
-    user_id = claims.get('user_id')
+    user_id = claims.get('user_id') 
 
     if user_id == '6e389795-cfb3-4e19-8c77-2e00fcc0634a':
-        
         # Carregar os dados
         df = carregar_dados('dados_falsos_processos_completos.xlsx')
         
