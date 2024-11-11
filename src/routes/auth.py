@@ -18,24 +18,34 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.post("/register")
 def register_user():
     data = request.get_json()
-    user = User.get_user_by_username(data['username'])
 
-    if user is not None:
-        return jsonify({"error": "User already exists"}), 409
+    required_fields = ['name', 'last_name', 'company', 'email', 'password', 'cpf_cnpj']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
 
-    new_user = User(data['username'], data['email'], data['password'], data['cpf_cnpj'])
+    if User.get_email(data['email']) or User.query.filter_by(cpf_cnpj=data['cpf_cnpj']).first():
+        return jsonify({"error": "Email or CPF/CNPJ already exists"}), 409
+
+    new_user = User(
+        name=data['name'],
+        last_name=data['last_name'],
+        company=data['company'],
+        email=data['email'],
+        password=data['password'],
+        cpf_cnpj=data['cpf_cnpj']
+    )
     new_user.save_to_db()
 
-    return jsonify({"message": "User created"}), 201
+    return jsonify({"message": "User created", "username": new_user.username}), 201
 
 @auth_bp.post("/login")
 def login_user():
     data = request.get_json()
-    user = User.get_user_by_username(data['username'])
+    user = User.get_email(data['email'])
 
     if user and (user.check_password(data['password'])):
-        access_token = create_access_token(identity=data['username'])
-        refresh_token = create_refresh_token(identity=data['username'])
+        access_token = create_access_token(identity=user.id)
+        refresh_token = create_refresh_token(identity=user.id)
 
         return (
             jsonify(
@@ -74,9 +84,10 @@ def refresh_token():
 def whoami():
     return jsonify(
         {
-            "message": "message",
+            "message": "User details",
             "user_details": {
                 "username": current_user.username,
+                "company": current_user.company,
                 "email": current_user.email,
                 "cpf_cnpj": current_user.cpf_cnpj
             }
