@@ -18,14 +18,12 @@ def tela_inicial():
 def pergunta():
     claims = get_jwt()
     user_id = claims.get('user_id')
+    company = claims.get('company')
 
-    if user_id == '6e389795-cfb3-4e19-8c77-2e00fcc0634a':
-        
-        # Carregar os dados
+    if company == 'Minha Empresa':
         df = carregar_dados('dados_falsos_processos_completos.xlsx')
         
-    elif user_id == '22222':
-        # Carregar os dados
+    elif company == 'Teste':
         df = carregar_dados('dados_user2.xlsx')
 
     else:
