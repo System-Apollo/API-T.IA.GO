@@ -17,6 +17,7 @@ def tela_inicial():
 @jwt_required()
 def pergunta():
     claims = get_jwt()
+
     user_id = claims.get('user_id')
     company = claims.get('company')
 
