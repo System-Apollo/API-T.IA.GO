@@ -1,6 +1,7 @@
 from ratelimit import limits, sleep_and_retry
 import os
 import google.generativeai as genai
+import re
 
 
 # Limites da API do ChatGemini
@@ -23,8 +24,22 @@ def filtrar_dataframe(pergunta, dataframe):
 
         # Se houver dados filtrados, reduzir o número de colunas para as mais relevantes
         if not df_filtrado.empty:
-            colunas_relevantes = ['Número CNJ', 'Data da distribuição', 'Status',
-                                  'Data do Última mov.']  # Ajuste conforme necessário
+            colunas_relevantes = [
+                "Número CNJ", "Assuntos", "Classe CNJ", "Foro",
+                "Data da distribuição", "Data de cadastro", "Data de citação", "Data da sentença", "Data do acordo",
+                "Data do arquivamento", "Data do primeiro acórdão", "Data do trânsito em julgado", "Data do Última mov.",
+                "Decisões por instância", "Rito", "Desfecho", "Desfecho do pedido de substituição", "Fase",
+                "Indicativo de bloqueio?", "Instância", "Juízes", 
+                "Envolvidos - Polo Ativo", "Envolvidos - Polo Passivo", "Resultado da Sentença",
+                "Possui pedido de substituição", "Segredo de justiça?", "Status", "Tipo de alteração da condenação",
+                "Tipos de recursos", "Órgão",  
+                "TST - Data do trânsito em julgado", "TST - Fase atual", "TST - Órgão judiciante",
+                "UF", "Ultimo movimento",
+                "Valor de acordo (R$)", "Valor de causa (R$)", "Valor de condenação (R$)", "Valor de custas (R$)",
+                "Vara", "Data de Audiência", "Data de Contestação", "Data de recurso",
+                "Tipo de audiência", "Data do acórdão", "Data de Sessão de Julgamento", "Data da última audiência realizada",
+                "Data da próxima audiência", "Data do último recurso apresentado", "Tipo de Recurso",
+            ]
             df_filtrado = df_filtrado[colunas_relevantes]
         else:
             return None  # Se não encontrar, retorna None
@@ -48,7 +63,13 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
 
     configurar_gemini()
     model = genai.GenerativeModel("gemini-1.5-pro-001")
-
+    
+    # Verifica se a pergunta é uma saudação, usando regex para palavras isoladas
+    saudacoes = ["bom dia", "boa tarde", "boa noite", "oi", "olá", "hello", "hi"]
+    saudacao_detectada = next((saudacao for saudacao in saudacoes if re.search(rf"\b{saudacao}\b", pergunta.lower())), None)
+    if saudacao_detectada:
+        print(f"Saudação detectada: '{saudacao_detectada}'")
+        return "Olá! Verifiquei que você me enviou alguns dados jurídico. Como posso te ajudar hoje?"
 
     dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
 
