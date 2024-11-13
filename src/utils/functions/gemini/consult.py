@@ -42,7 +42,7 @@ def filtrar_dataframe(pergunta, dataframe):
             ]
             df_filtrado = df_filtrado[colunas_relevantes]
         else:
-            return None  # Se não encontrar, retorna None
+            return None
     else:
         return None  # Se não houver a coluna "Envolvidos - Polo Ativo"
     return df_filtrado
@@ -63,9 +63,23 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
 
     configurar_gemini()
     model = genai.GenerativeModel("gemini-1.5-pro-001")
-    
-    # Verifica se a pergunta é uma saudação, usando regex para palavras isoladas
-    saudacoes = ["bom dia", "boa tarde", "boa noite", "oi", "olá", "hello", "hi"]
+
+    saudacoes = [
+        "bom dia",
+        "boa tarde",
+        "boa noite",
+        "oi",
+        "olá",
+        "ola",
+        "hello",
+        "hi",
+        "tiago",
+        "thiago",
+        "tudo bem",
+        "me ajude",
+        "me auxilie",
+    ]
+
     saudacao_detectada = next((saudacao for saudacao in saudacoes if re.search(rf"\b{saudacao}\b", pergunta.lower())), None)
     if saudacao_detectada:
         print(f"Saudação detectada: '{saudacao_detectada}'")
