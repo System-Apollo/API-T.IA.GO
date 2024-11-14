@@ -784,36 +784,31 @@ def processar_sentenca(dataframe, pergunta):
 
 def processar_valor_acordo(dataframe):
     if 'Valor de acordo (R$)' in dataframe.columns:
-        # Garantir que todos os valores estão no formato de string
+
+
         dataframe['Valor de acordo (R$)'] = dataframe['Valor de acordo (R$)'].astype(str)
 
-        # Remover símbolos de moeda e converter valores para numéricos
         dataframe['Valor de acordo (R$)'] = (
             dataframe['Valor de acordo (R$)']
-            .str.replace('R$', '', regex=False)  # Remover o símbolo 'R$'
-            .str.replace('.', '', regex=False)  # Remover os pontos dos milhares
-            .str.replace(',', '.', regex=False)  # Substituir vírgula por ponto para decimal
+            .str.replace('R$', '', regex=False)
+            .str.replace('.', '', regex=False)
+            .str.replace(',', '.', regex=False)
         )
 
-        # Converter os valores da coluna para numéricos
         dataframe['Valor de acordo (R$)'] = pd.to_numeric(dataframe['Valor de acordo (R$)'], errors='coerce')
 
-        # Somar os valores, ignorando os NaN
         valor_total_acordo = dataframe['Valor de acordo (R$)'].sum()
 
-        # Contar quantos valores de acordo existem (sem contar valores 0)
         quantidade_acordos = dataframe[dataframe['Valor de acordo (R$)'] > 0]['Valor de acordo (R$)'].count()
 
-        # Preparar dados para gráfico (quantidade e valor total), convertendo para tipos JSON-serializáveis
         grafico_data = {
-            "Quantidade de Acordos": int(quantidade_acordos),  # Converter para int
-            "Valor Total": float(valor_total_acordo)  # Converter para float
+            "Quantidade de Acordos": int(quantidade_acordos),
+            "Valor Total": float(valor_total_acordo)
         }
 
-        # Formatar o valor total no formato de moeda brasileiro
-        valor_total_acordo_formatado = locale.currency(valor_total_acordo, grouping=True, symbol=True)
+        valor_total_acordo_formatado = f"R$ {valor_total_acordo:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-        # Retornar a resposta e os dados para o gráfico
+
         return f"O valor total dos acordos é de R$ {valor_total_acordo_formatado} com {quantidade_acordos} acordos.", grafico_data
     else:
         return "Não foi possível calcular o valor total dos acordos, coluna 'Valor do acordo' não encontrada.", {}
