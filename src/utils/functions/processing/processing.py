@@ -631,28 +631,24 @@ def processar_media_valor_causa_por_estado(dataframe):
 
 
 def processar_maior_valor_causa_por_estado(dataframe):
-    # Converter a coluna 'Total da causa' para string, limpar e converter para float
-    dataframe['Total da causa'] = dataframe['Total da causa'].astype(str).str.replace('R$', '', regex=False)\
+
+    dataframe['Valor de causa (R$)'] = dataframe['Valor de causa (R$)'].astype(str).str.replace('R$', '', regex=False)\
         .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
 
-    # Converter para numérico, tratando erros como NaN
-    dataframe['Total da causa'] = pd.to_numeric(dataframe['Total da causa'], errors='coerce')
-
-    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
+    print(dataframe['Valor de causa (R$)'])
+    dataframe['Valor de causa (R$)'] = pd.to_numeric(dataframe['Valor de causa (R$)'], errors='coerce')
+    print(dataframe['Valor de causa (R$)'])
     dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
 
-    # Agrupar por estado e somar os valores de 'Total da causa'
-    soma_por_estado = dataframe.groupby('Estado')['Total da causa'].sum()
-
-    # Encontrar o estado com o maior valor de causa
+    soma_por_estado = dataframe.groupby('Estado')['Valor de causa (R$)'].sum()
+    print(soma_por_estado)
     estado_com_maior_valor = soma_por_estado.idxmax()
     maior_valor = soma_por_estado.max()
+    print(maior_valor)
 
-    # Criar a resposta textual, formatando o valor no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = f"O estado com o maior valor de causa é {estado_com_maior_valor}, com um total de R$ {maior_valor:,.2f}".replace(
         ',', 'X').replace('.', ',').replace('X', '.')
 
-     # Retornar os dados em um formato serializável para o gráfico
     return resposta_texto, {
         "valor_causa_por_estado": soma_por_estado.to_dict()
     }
