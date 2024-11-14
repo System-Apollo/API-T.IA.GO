@@ -658,29 +658,25 @@ def processar_maior_valor_causa_por_estado(dataframe):
     }
 
 def processar_valor_condenacao_por_estado(dataframe):
-    # Converter os valores da coluna 'Valor de condenação (R$)' para string e remover 'R$', '.', e ',' para transformar em float
-    dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
-                                                                                                          regex=False).str.replace(
-        '.', '', regex=False).str.replace(',', '.', regex=False)
 
-    # Converter a coluna para valores numéricos, tratando os erros como NaN
+    dataframe['Valor de condenação (R$)'] = (dataframe['Valor de condenação (R$)']
+                                             .astype(str)
+                                             .str.replace('R$', '', regex=False)
+                                             .str.replace('.', '', regex=False)
+                                             .str.replace(',', '.', regex=False))
+
     dataframe['Valor de condenação (R$)'] = pd.to_numeric(dataframe['Valor de condenação (R$)'], errors='coerce')
-
-    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
     dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
 
-    # Agrupar por estado e somar os valores
     soma_por_estado = dataframe.groupby('Estado')['Valor de condenação (R$)'].sum()
 
-    # Criar a resposta textual, formatando os valores no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = "O valor total de condenações por estado é:\n"
     resposta_texto += "\n".join(
         [f"{estado}: R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for estado, valor in
          soma_por_estado.items()])
-    
-    # Retornar os dados em um formato serializável para o gráfico
+
     return resposta_texto, {
-        "condenacao_por_estado": soma_por_estado.to_dict()  # Retorna um dicionário com os valores para o gráfico
+        "condenacao_por_estado": soma_por_estado.to_dict()
     }
     
 
