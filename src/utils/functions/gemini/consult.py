@@ -2,6 +2,7 @@ from ratelimit import limits, sleep_and_retry
 import os
 import google.generativeai as genai
 import re
+from src.models.user import User
 
 
 # Limites da API do ChatGemini
@@ -62,6 +63,7 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
     from src.utils.functions.conversation.question import historico_conversa
 
     configurar_gemini()
+
     model = genai.GenerativeModel("gemini-1.5-pro-001")
 
     saudacoes = [
@@ -101,8 +103,9 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
         contexto_conversa = "Nenhum histórico de conversa disponível."
 
     prompt = (f"Contexto da conversa:\n{contexto_conversa}\n"
-              f"Os dados a seguir são extraídos de um arquivo Excel:\n{contexto}\n\n"
-              f"Converse com o usuário e responda de maneira amigável e educada, sem muito lhe questionar: {pergunta}")
+              f"Os dados a seguir são extraídos de:\n{contexto}\n"
+              f"Você está conversando com o usuário: \n{User.username}\n"
+              f"Diga que você é o Gemini da Google, mas que está axiliando o Tiago.")
     tokens_enviados = contar_tokens(prompt)
     print(f"Tokens enviados: {tokens_enviados}")
     try:
