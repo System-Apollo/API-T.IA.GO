@@ -44,7 +44,23 @@ categoria_perguntas['prox_audiencia'] = [ #error
     r"minhas audiências futuras",
     r"quando é minha próxima audiência",
     r"qual é a próxima audiência",
-    r"me informe sobre minhas próximas audiências"
+    r"me informe sobre minhas próximas audiências",
+    r"teremos no mês de dezembro",
+    r"agendadas para dezembro",
+    r"total de audiências para o mês de dezembro",
+    r"quantas audiências teremos em dezembro",
+    r"programadas para o próximo mês",
+    r"para o mês de dezembro",
+    r"teremos em dezembro",
+    r"previstas para dezembro",
+    r"confirmadas para o mês de dezembro",
+    r"agendadas para dezembro",
+    r"sessões de audiência teremos no próximo mês",
+    r"número de audiências que teremos no mês de dezembro",
+    r"previstas para acontecer em dezembro",
+    r"audiências estão programadas para dezembro",
+    r"confirmadas para o mês de dezembro",
+    r"audiências estão na agenda para dezembro"
 ]
 
 categoria_perguntas['estado_maior_media_valor_causa'] = [
@@ -88,7 +104,24 @@ categoria_perguntas['quantidade_processos_estado'] = [
     r"processos por estado",
     r"processos em cada estado",
     r"quantos processos há por estado",
-    r"processos divididos por estado"
+    r"processos divididos por estado",
+    r"Divididos em quais estados",
+    r"quais estados os processos estão divididos",
+    r"estados em que os processos estão distribuídos",
+    r"informar em quais estados",
+    r"divididos entre quais estados",
+    r"estados há processos",
+    r"quais estados os processos estão",
+    r"estados possuem processos cadastrados",
+    r"que estados os processos estão",
+    r"listar os estados onde há processos ativos",
+    r"quais estados os processos",
+    r"distribuição dos processos por estado",
+    r"quais estados estão os processos",
+    r"divisão dos processos entre os estados",
+    r"estados há processos na base",
+    r"lista de estados com processos"
+
 ]
 
 categoria_perguntas['quantidade_processos_comarca'] = [
@@ -125,6 +158,37 @@ categoria_perguntas['valor_total_causa'] = [
 ]
 
 categoria_perguntas['processos_ativos'] = [
+    r"gostaria de saber quantos processos ativos",
+    r"processos ativos eu tenho na base",
+    r"pode me informar o número de processos ativos",
+    r" total de processos ativos",
+    r"ativos na base hoje",
+    r"consultar quantos processos ativos",
+    r"processos estão ativos",
+    r"número atual de processos ativos",
+    r"verificar quantos processos ativos",
+    r"processos ativos na base até agora",
+    r"mostrar o total de processos ativos",
+    r"registrados como ativos",
+    r"contagem de processos ativos",
+    r"processos ativos atualmente",
+    r"processos ativos que tenho",
+    r"dizer quantos processos ativos",
+    r"conferir quantos processos estão ativos",
+    r"conferir quantos processos ativos",
+    r"quantidade atual de processos ativos",
+    r"verificar quantos processos ativos existem",
+    r"processos ativos foram registrados",
+    r"saber o total de processos ativos",
+    r"listar o número de processos ativos",
+    r"processos ativos estão disponíveis",
+    r"confirmar o total de processos ativos",
+    r"processos ativos cadastrados",
+    r"processos ativos estão",
+    r"número mais recente de processos ativo",
+    r"quantidade total de processos ativos",
+    r"situação atual dos processos ativos",
+    r"contagem atual de processos ativos",
     r"quantos processos ativos",
     r"processos ativos",
     r"quantos processos tenho ativos",
@@ -166,6 +230,35 @@ categoria_perguntas['sentencas'] = [
     r"quais foram as sentencas",
     r"resultados das sentencas",
     r"sentencas proferidas"
+]
+
+categoria_perguntas['valor_sentenca'] = [
+    r"sentença mais elevada",
+    r"sentença de maior valor",
+    r"sentença mais alta",
+    r"sentença mais significativa",
+    r"sentença de maior valor",
+    r"recebeu a sentença mais elevada",
+    r"caso com uma sentença mais alta",
+    r"processo com a sentença mais elevada",
+    r"dizer qual caso tem a sentença mais alta",
+    r"sentença de maior valor até agora",
+    r"conferir o caso com a sentença mais elevada",
+    r"sentença mais alta registrada",
+    r"maior valor de sentença",
+    r"maior sentença",
+    r"sentença de valor mais alto",
+    r"destaca pela sentença",
+    r"valor de sentença aplicado",
+    r"sentença considerada a mais alta",
+    r"sentença mais elevada está registrada",
+    r"recebeu a sentença mais alta",
+    r"montante mais alto na sentença",
+    r"relevante em termos de valor de sentença",
+    r"decisão judicial mais elevada em valor",
+    r"decisão de sentença mais",
+    r"sentença de valor mais expressivo",
+    r"recebeu a maior sentença"
 ]
 
 categoria_perguntas['assuntos_recorrentes'] = [
@@ -359,9 +452,21 @@ categoria_perguntas['classe_cnj'] = [
     r"quantos sao trabalhistas",
     r"quantos sao civeis",
     r"quantos sao penais"
+    r"quantos são trabalhista",
+    r"processos são trabalhistas",
+    r"quantos processos trabalhistas",
+    r"número de processos trabalhistas",
+    r"processos ativos são trabalhistas",
+    r"quantos processos trabalhistas",
+    r"quantidade de processos trabalhistas",
+    r"natureza trabalhista",
+    r"consultar quantos processos trabalhistas",
+    r"processos trabalhistas temos",
+    r"total de processos trabalhistas",
+    r"quantos processos são trabalhistas",
+    r"cadastrados são trabalhistas",
+    r"dizer o número de processos trabalhistas",
+    r"verificar quantos processos são da área trabalhista",
+    r"quantidade de processos trabalhistas"
 ]
 
-categoria_perguntas['valor_sentenca'] = [
-    r"qual sentenca mais elevada",
-    r"que sentenca foi mais elevada"
-]
