@@ -57,29 +57,20 @@ def processar_divisao_por_rito(dataframe):
 
 
 def processar_maior_tempo_sem_movimentacao(dataframe):
-    # Converter as colunas 'Data de distribuição' e 'Última mov.' para o formato datetime
-    dataframe['Data de distribuição'] = pd.to_datetime(dataframe['Data de distribuição'], format='%d/%m/%Y',
-                                                       errors='coerce')
-    dataframe['Última mov.'] = pd.to_datetime(dataframe['Última mov.'], format='%d/%m/%Y', errors='coerce')
 
-    # Calcular a diferença de dias entre 'Última mov.' e 'Data de distribuição'
-    dataframe['Dias sem movimentação'] = (dataframe['Última mov.'] - dataframe['Data de distribuição']).dt.days
+    dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Dias sem movimentação'] = (dataframe['Data do Última mov.'] - dataframe['Data da distribuição']).dt.days
 
-    # Identificar o processo com maior tempo sem movimentação
     processo_maior_tempo = dataframe.loc[dataframe['Dias sem movimentação'].idxmax()]
 
-    # Extrair os dados do processo
     numero_processo = processo_maior_tempo['Número CNJ']
     dias_sem_movimentacao = processo_maior_tempo['Dias sem movimentação']
 
-    # Selecionar os 4 processos com maior tempo sem movimentação
-    top_4_processos = dataframe[['Número CNJ', 'Dias sem movimentação']].sort_values(by='Dias sem movimentação',
-                                                                                     ascending=False).head(4)
+    top_4_processos = dataframe[['Número CNJ', 'Dias sem movimentação']].sort_values(by='Dias sem movimentação', ascending=False).head(4)
 
-    # Preparar os dados para o gráfico
     dados_grafico = top_4_processos.set_index('Número CNJ').to_dict()['Dias sem movimentação']
 
-    # Retornar a resposta e os dados para o gráfico
     return f"O processo com maior tempo sem movimentação é o número {numero_processo}, com {dias_sem_movimentacao} dias sem movimentação.", {
         "processos": dados_grafico
     }
@@ -746,15 +737,14 @@ def processar_fase(dataframe, pergunta=None):
     }
 
 
-# Função auxiliar para processar perguntas sobre "Resultado da Sentença"
+
 def processar_sentenca(dataframe, pergunta):
-    # Verificar se a coluna 'Resultado da Sentença' existe no DataFrame
+
     if 'Resultado da Sentença' not in dataframe.columns:
         return "Erro: A coluna 'Resultado da Sentença' não foi encontrada no arquivo de dados.", {}
-    # Contar a ocorrência dos diferentes resultados de sentença, normalizando para lowercase
+
     sentencas = dataframe['Resultado da Sentença'].str.lower().value_counts().to_dict()
 
-    # Dicionário de abreviações para os resultados das sentenças
     abreviacoes_sentencas = {
         "sentenca improcedente": "Improcedente",
         "sentenca de extincao sem resolucao do merito": "Sem resolução do mérito",
@@ -762,13 +752,10 @@ def processar_sentenca(dataframe, pergunta):
         "sentenca de homologacao de acordo": "Acordo"
     }
 
-    # Substituir os nomes completos pelas abreviações no dicionário de sentenças
     sentencas_abreviadas = {abreviacoes_sentencas.get(key, key): value for key, value in sentencas.items()}
 
-    # Gerar o texto da resposta com a divisão dos resultados das sentenças
     sentencas_texto = ", ".join([f"{sentenca}: {quantidade}" for sentenca, quantidade in sentencas_abreviadas.items()])
 
-    # Retornar a resposta com a distribuição dos resultados
     return f"Os resultados das sentenças estão distribuídos da seguinte forma: {sentencas_texto}.", {
         "sentencas": sentencas_abreviadas
     }
@@ -886,18 +873,14 @@ def processar_semana(dataframe, coluna, pergunta):
     return f"Não foi possível identificar a semana especificada.", {}
 
 def tratar_pergunta_proximas_audiencias(dataframe):
-    # Supondo que o dataframe tenha uma coluna chamada 'Data da Audiência' com as datas das audiências
-    # Vamos converter as datas para o formato datetime
+
     dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
 
-    # Filtrar as audiências que são futuras (a partir da data de hoje)
     hoje = datetime.now()
     proximas_audiencias = dataframe[dataframe['Data de Audiência'] >= hoje]
 
-    # Ordenar pela Data de Audiência
     proximas_audiencias = proximas_audiencias.sort_values(by='Data de Audiência')
 
-    # Se houver audiências futuras
     if not proximas_audiencias.empty:
         resposta = "Verificando os dados encontrei:\n"
         for _, row in proximas_audiencias.iterrows():
@@ -908,7 +891,6 @@ def tratar_pergunta_proximas_audiencias(dataframe):
     else:
         resposta = "Você não tem audiências futuras agendadas."
 
-    # Retornar a resposta
     return resposta,{}
 
 def processar_processo_mais_antigo(dataframe):

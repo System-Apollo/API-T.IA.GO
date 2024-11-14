@@ -1,10 +1,9 @@
 from collections import defaultdict
 
-# Dicionário para mapear tipos de perguntas e suas variacoes
 categoria_perguntas = defaultdict(list)
 
-# Mapeamento de categorias para funcoes com 8 variacoes de perguntas para cada
-categoria_perguntas['valor_total_acordos'] = [ #error
+
+categoria_perguntas['valor_total_acordos'] = [
     r"valor total de acordos",
     r"qual o valor total dos acordos",
     r"quanto foi o total de acordos",
@@ -15,7 +14,7 @@ categoria_perguntas['valor_total_acordos'] = [ #error
     r"total acordado"
 ]
 
-categoria_perguntas['valor_condenacao_estado'] = [ #mudar estado
+categoria_perguntas['valor_condenacao_estado'] = [
     r"valor de condenacao por estado",
     r"quanto foi condenado por estado",
     r"qual o valor da condenacao em cada estado",
@@ -26,7 +25,7 @@ categoria_perguntas['valor_condenacao_estado'] = [ #mudar estado
     r"condenacoes por estado"
 ]
 
-categoria_perguntas['estado_maior_valor_causa'] = [ #error
+categoria_perguntas['estado_maior_valor_causa'] = [
     r"estado com maior valor da causa",
     r"qual estado tem o maior valor da causa",
     r"qual estado tem a maior causa",
@@ -59,7 +58,7 @@ categoria_perguntas['estado_maior_media_valor_causa'] = [
     r"média mais alta de causas por estado"
 ]
 
-categoria_perguntas['divisao_resultados_processos'] = [ #error
+categoria_perguntas['divisao_resultados_processos'] = [
     r"divisao dos resultados dos processos",
     r"como estao divididos os resultados",
     r"divisao dos processos por resultado",
@@ -70,7 +69,7 @@ categoria_perguntas['divisao_resultados_processos'] = [ #error
     r"dividir resultados dos processos"
 ]
 
-categoria_perguntas['transitaram_julgado'] = [  #error ?????
+categoria_perguntas['transitaram_julgado'] = [
     r"processos que transitaram em julgado",
     r"quais processos transitaram em julgado",
     r"transitaram em julgado",
@@ -114,7 +113,7 @@ categoria_perguntas['quantidade_total_processos'] = [
     r"total de casos"
 ]
 
-categoria_perguntas['valor_total_causa'] = [ #?
+categoria_perguntas['valor_total_causa'] = [
     r"valor total da causa",
     r"qual o valor total das causas",
     r"total de valor de causa",
@@ -147,7 +146,7 @@ categoria_perguntas['processos_arquivados'] = [
     r"quantos casos arquivados"
 ]
 
-categoria_perguntas['quantidade_recursos'] = [ #??
+categoria_perguntas['quantidade_recursos'] = [
     r"quantos recursos foram interpostos",
     r"número de recursos interpostos",
     r"recursos interpostos",
@@ -158,7 +157,7 @@ categoria_perguntas['quantidade_recursos'] = [ #??
     r"quantos recursos já foram interpostos"
 ]
 
-categoria_perguntas['sentencas'] = [ ## ?
+categoria_perguntas['sentencas'] = [
     r"divisao dos resultados das sentencas",
     r"divisao das sentencas",
     r"como estao divididos os resultados das sentencas",
@@ -235,10 +234,10 @@ categoria_perguntas['estado_mais_ofensor'] = [
     r"estado com maior risco"
 ]
 
-categoria_perguntas['comarca_mais_ofensora'] = [ ## error
+categoria_perguntas['comarca_mais_ofensora'] = [
     r"comarca devo ter mais preocupacao",
     r"comarca mais ofensora",
-    r"qual comarca é a mais preocupante",
+    r"qual comarca é a mais preocupante",##gemini
     r"comarca com maior risco",
     r"comarca mais arriscada",
     r"comarca com mais ofensas",
@@ -301,7 +300,7 @@ categoria_perguntas['processos_extintos_sem_custos'] = [
     r"extincao de processos sem custos"
 ]
 
-categoria_perguntas['processo_maior_tempo_sem_movimentacao'] = [ ##error
+categoria_perguntas['processo_maior_tempo_sem_movimentacao'] = [
     r"processo com maior tempo sem movimentacao",
     r"qual processo está mais tempo sem movimentacao",
     r"processo que está mais tempo parado",
@@ -323,7 +322,7 @@ categoria_perguntas['divisao_por_rito'] = [
     r"como estao os processos divididos por rito"
 ]
 
-categoria_perguntas['processos_nao_julgados'] = [ #erro
+categoria_perguntas['processos_nao_julgados'] = [
     r"quantos processos ainda nao foram julgados",
     r"processos nao julgados",
     r"quais processos ainda nao foram julgados",
