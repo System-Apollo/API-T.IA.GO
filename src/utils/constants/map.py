@@ -360,3 +360,8 @@ categoria_perguntas['classe_cnj'] = [
     r"quantos sao civeis",
     r"quantos sao penais"
 ]
+
+categoria_perguntas['valor_sentenca'] = [
+    r"qual sentenca mais elevada",
+    r"que sentenca foi mais elevada"
+]

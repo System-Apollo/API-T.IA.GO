@@ -143,3 +143,5 @@ def processar_categoria(categoria, dataframe, pergunta):
         return processar_processo_mais_antigo(dataframe)
     elif categoria == 'classe_cnj':
         return processar_contagem_classe_cnj(dataframe)
+    elif categoria == 'valor_sentenca':
+        return processar_maior_valor_condenacao(dataframe)

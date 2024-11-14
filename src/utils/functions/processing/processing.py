@@ -738,7 +738,7 @@ def processar_fase(dataframe, pergunta=None):
 
 
 
-def processar_sentenca(dataframe, pergunta):
+def processar_sentenca(dataframe):
 
     if 'Resultado da Sentença' not in dataframe.columns:
         return "Erro: A coluna 'Resultado da Sentença' não foi encontrada no arquivo de dados.", {}
@@ -935,4 +935,19 @@ def processar_contagem_classe_cnj(df):
 
 
     return f"Dos {total}, afirmo que são {trabalhista_count} trabalhistas, {penal_count} penais e {civel_count} cíveis.", {}
+
+def processar_maior_valor_condenacao(df):
+
+    if 'Valor de condenação (R$)' not in df.columns:
+        raise ValueError("A coluna 'Valor de condenação (R$)' não está presente no DataFrame fornecido.")
+
+    df['Valor de condenação (R$)'] = pd.to_numeric(df['Valor de condenação (R$)'], errors='coerce')
+
+    linha_maxima = df.loc[df['Valor de condenação (R$)'].idxmax()]
+    valor_condenacao = linha_maxima['Valor de condenação (R$)']
+    numero_cnj = linha_maxima['Número CNJ']
+    orgao = linha_maxima['Órgão']
+
+    return f"A sentença mais elevada foi no caso de número {numero_cnj} no valor de {valor_condenacao} em trâmite no {orgao}", {}
+
 
