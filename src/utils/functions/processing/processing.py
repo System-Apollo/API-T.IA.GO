@@ -941,9 +941,16 @@ def processar_maior_valor_condenacao(df):
     if 'Valor de condenação (R$)' not in df.columns:
         raise ValueError("A coluna 'Valor de condenação (R$)' não está presente no DataFrame fornecido.")
 
-    df['Valor de condenação (R$)'] = pd.to_numeric(df['Valor de condenação (R$)'], errors='coerce')
+    row_regex = (
+        df['Valor de condenação (R$)']
+        .str.replace('R$', '', regex=False)
+        .str.replace('.', '', regex=False)
+        .str.replace(',', '.', regex=False)
+    )
 
-    linha_maxima = df.loc[df['Valor de condenação (R$)'].idxmax()]
+    row_number = pd.to_numeric(row_regex, errors='coerce')
+
+    linha_maxima = df.loc[row_number.idxmax()]
     valor_condenacao = linha_maxima['Valor de condenação (R$)']
     numero_cnj = linha_maxima['Número CNJ']
     orgao = linha_maxima['Órgão']
