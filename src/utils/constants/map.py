@@ -354,3 +354,9 @@ categoria_perguntas['processo_mais_antigo'] = [
     r"número do processo mais antigo",
     r"quais sao os processos mais antigos"
 ]
+
+categoria_perguntas['classe_cnj'] = [
+    r"quantos sao trabalhistas",
+    r"quantos sao civeis",
+    r"quantos sao penais"
+]

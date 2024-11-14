@@ -140,4 +140,6 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'processos_nao_citados':
         return processar_nao_citados(dataframe)
     elif categoria == 'processo_mais_antigo':
-        return processar_processo_mais_antigo(dataframe) 
+        return processar_processo_mais_antigo(dataframe)
+    elif categoria == 'classe_cnj':
+        return processar_contagem_classe_cnj(dataframe)

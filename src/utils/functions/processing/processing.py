@@ -922,3 +922,17 @@ def processar_processo_mais_antigo(dataframe):
     else:
         resposta = "Nenhum processo encontrado com uma data válida."
         return resposta, {}
+
+def processar_contagem_classe_cnj(df):
+
+    if 'Classe CNJ' not in df.columns:
+        raise ValueError("A coluna 'Classe CNJ' não está presente no DataFrame fornecido.")
+
+    total = len(df["Classe CNJ"])
+    trabalhista_count = df['Classe CNJ'].str.contains('Ação Trabalhista', case=False, na=False).sum()
+    penal_count = df['Classe CNJ'].str.contains('Ação Penal', case=False, na=False).sum()
+    civel_count = df['Classe CNJ'].str.contains('Ação Civel', case=False, na=False).sum()
+
+
+    return f"Dos {total}, afirmo que são {trabalhista_count} trabalhistas, {penal_count} penais e {civel_count} cíveis.", {}
+
