@@ -928,7 +928,7 @@ def processar_contagem_classe_cnj(df):
     if 'Classe CNJ' not in df.columns:
         raise ValueError("A coluna 'Classe CNJ' não está presente no DataFrame fornecido.")
 
-    total = len(df["Classe CNJ"])
+    total = int(df["Classe CNJ"].count())
     trabalhista_count = df['Classe CNJ'].str.contains('Ação Trabalhista', case=False, na=False).sum()
     penal_count = df['Classe CNJ'].str.contains('Ação Penal', case=False, na=False).sum()
     civel_count = df['Classe CNJ'].str.contains('Ação Civel', case=False, na=False).sum()
