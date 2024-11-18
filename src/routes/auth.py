@@ -44,12 +44,14 @@ def login_user():
     data = request.get_json()
     user = User.get_email(data['email'])
 
-    if user.get_activity() != True:
-        return jsonify({"error": "Inactivated account"}), 403
+
 
     if user and (user.check_password(data['password'])):
         access_token = create_access_token(identity=user.id)
         refresh_token = create_refresh_token(identity=user.id)
+
+        if not user.get_activity():
+            return jsonify({"error": "Inactivated account"}), 403
 
         return (
             jsonify(
