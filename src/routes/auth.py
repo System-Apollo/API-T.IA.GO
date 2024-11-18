@@ -32,7 +32,8 @@ def register_user():
         company=data['company'],
         email=data['email'],
         password=data['password'],
-        cpf_cnpj=data['cpf_cnpj']
+        cpf_cnpj=data['cpf_cnpj'],
+        is_activity=False
     )
     new_user.save_to_db()
 
@@ -42,6 +43,9 @@ def register_user():
 def login_user():
     data = request.get_json()
     user = User.get_email(data['email'])
+
+    if user.get_activity() != True:
+        return jsonify({"error": "Inactivated account"}), 403
 
     if user and (user.check_password(data['password'])):
         access_token = create_access_token(identity=user.id)
