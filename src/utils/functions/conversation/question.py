@@ -52,7 +52,9 @@ def remover_acentos(texto):
 
 
 def processar_pergunta(pergunta, dataframe, user_id):
+    print(f"Pergunta recebida: {pergunta}")
     pergunta_normalizada = normalizar_pergunta(pergunta)
+    print(f"Pergunta normalizada: {pergunta_normalizada}")
     grafico_data = None
     if user_id not in historico_conversa:
         historico_conversa[user_id] = []
@@ -89,8 +91,12 @@ def processar_categoria(categoria, dataframe, pergunta):
         return processar_media_valor_causa_por_estado(dataframe)
     elif categoria == 'transitaram_julgado':
         return processar_transito_julgado(dataframe)
+    elif categoria == "instancia_":
+        return processar_instancia_por_cnj(dataframe)
     elif categoria == 'prox_audiencia':
         return tratar_pergunta_proximas_audiencias(dataframe)
+    elif categoria == 'audiencia_dezembro':
+        return tratar_pergunta_audiencias_dezembro(dataframe)
     elif categoria == 'quantidade_processos_estado':
         return processar_quantidade_processos_por_estado(dataframe)
     elif categoria == 'quantidade_processos_comarca':

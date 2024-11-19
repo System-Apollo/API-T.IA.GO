@@ -8,6 +8,8 @@ try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 except locale.Error:
     locale.setlocale(locale.LC_ALL, '')
+import unicodedata
+
 
 
 
@@ -676,19 +678,19 @@ def processar_status(pergunta, dataframe, status):
 
     # Retornar a chave correta dependendo do status
     if status_lower == 'ativo':
-        return f"Atualmente, há {quantidade} processos ativos.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos ativos.", {
             "ativos": quantidade,
             "arquivados": dataframe[dataframe['Status'].str.lower() == 'arquivado'].shape[0]
             # Adicionar arquivados para gráfico comparativo
         }
     elif status_lower == 'arquivado':
-        return f"Atualmente, há {quantidade} processos arquivados/encerrados.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos arquivados/encerrados.", {
             "ativos": dataframe[dataframe['Status'].str.lower() == 'ativo'].shape[0],
             # Adicionar ativos para gráfico comparativo
             "arquivados": quantidade
         }
     else:
-        return f"Atualmente, há {quantidade} processos {status}.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos {status}.", {
             "status": quantidade
         }
 
@@ -893,6 +895,7 @@ def tratar_pergunta_proximas_audiencias(dataframe):
 
     return resposta,{}
 
+
 def processar_processo_mais_antigo(dataframe):
     # Converter a coluna 'Data da distribuição' para o tipo datetime, ignorando erros de conversão
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], errors='coerce', format='%d/%m/%Y')
@@ -956,5 +959,94 @@ def processar_maior_valor_condenacao(df):
     orgao = linha_maxima['Órgão']
 
     return f"A sentença mais elevada foi no caso de número {numero_cnj} no valor de {valor_condenacao} em trâmite no {orgao}", {}
+
+def processar_instancia_por_cnj(dataframe):
+    # Preencher valores nulos ou traços na coluna 'Instância' e 'Resultado da Sentença'
+    dataframe['Instância'] = dataframe['Instância'].fillna('Sem instância')
+    dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].replace('-', 'Sem sentença').fillna('Sem sentença')
+
+    # Manter apenas processos com "Sentença Procedente" ou "Sentença Improcedente"
+    dataframe = dataframe[dataframe['Resultado da Sentença'].str.contains("Procedente|Improcedente", case=False, na=False)]
+
+    # Filtrar as linhas com números CNJ válidos
+    dataframe = dataframe.dropna(subset=['Número CNJ'])
+
+    # Filtrar processos na "Primeira instância"
+    primeira_instancia = dataframe[dataframe['Instância'].str.contains("Primeira instância", case=False, na=False)]
+    total_primeira_instancia = len(primeira_instancia)
+
+    # Contar processos com sentença procedente na Primeira Instância
+    procedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Procedente", case=False, na=False)]
+    total_procedentes = len(procedentes)
+
+    # Contar processos com sentença improcedente na Primeira Instância
+    improcedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Improcedente", case=False, na=False)]
+    total_improcedentes = len(improcedentes)
+
+    # Resposta textual para a pergunta "algum deles foram julgados em primeira instância?"
+    resposta = (
+        f"Sim, temos {total_procedentes} processos com sentença procedente na Primeira Instância e "
+        f"{total_improcedentes} processos com sentença improcedente."
+    )
+
+    # Dados para gráficos
+    grafico_data = {
+        "Sentenças Procedentes": total_procedentes,
+        "Sentenças Improcedentes": total_improcedentes,
+    }
+
+    return resposta, grafico_data
+
+
+def calcular_media_condenacao_julho(df):
+    if 'Valor de condenação (R$)' not in df.columns or 'Data' not in df.columns:
+        raise ValueError("As colunas 'Valor de condenação (R$)' e 'Data' precisam estar presentes no DataFrame fornecido.")
+
+    # Filtrar as linhas do mês de julho
+    df['Data'] = pd.to_datetime(df['Data'], errors='coerce')  # Garantir que a coluna 'Data' esteja no formato datetime
+    df_julho = df[df['Data'].dt.month == 7]
+
+    if df_julho.empty:
+        return "Não há dados de condenações no mês de julho.", {}
+
+    # Processar os valores de condenação
+    valores = (
+        df_julho['Valor de condenação (R$)']
+        .str.replace('R$', '', regex=False)
+        .str.replace('.', '', regex=False)
+        .str.replace(',', '.', regex=False)
+    )
+    valores_numeric = pd.to_numeric(valores, errors='coerce')
+
+    # Calcular a média
+    media_condenacao = valores_numeric.mean()
+
+    if pd.isna(media_condenacao):
+        return "Não foi possível calcular a média, pois os valores de condenação estão ausentes ou inválidos.", {}
+
+    return {}
+
+
+    
+def tratar_pergunta_audiencias_dezembro(dataframe):
+    dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
+    audiencias_dezembro = dataframe[dataframe['Data de Audiência'].dt.month == 12]
+    audiencias_dezembro = audiencias_dezembro.sort_values(by='Data de Audiência')
+
+    if not audiencias_dezembro.empty:
+        resposta = f"Encontrei {len(audiencias_dezembro)} audiências agendadas para o mês de dezembro:\n"
+        for _, row in audiencias_dezembro.iterrows():
+            resposta += (
+                f"\nProcesso {row['Número CNJ']} com audiência em {row['Data de Audiência'].strftime('%d/%m/%Y')}\n"
+                f"Local: {row['Vara']}\n"
+                f"Foro: {row['Foro']}\n"
+                f"Tipo: {row['Tipo de audiência']}\n"
+                f"Autor: {row['Envolvidos - Polo Ativo']}.\n\n"
+            )
+    else:
+        resposta = "Não há audiências agendadas para o mês de dezembro."
+
+    return resposta.strip(), {}
+
 
 

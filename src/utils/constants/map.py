@@ -3,6 +3,19 @@ from collections import defaultdict
 categoria_perguntas = defaultdict(list)
 
 
+categoria_perguntas['audiencia_dezembro'] =[
+    r"Quantas audiencias teremos no mes de dezembro",
+]
+    
+categoria_perguntas['instancia_'] = [
+    r"Algum deles foi julgado em primeira instancia",
+    r"Algum deles foi julgado em segunda instancia",
+    r"Algum deles foi julgado em terceira instancia",
+    r"Qual o processo julgado em terceira instancia",
+    r"Qual o processo julgado em segunda instancia",
+    r"Qual o processo julgado em primeira instancia",
+    r"instancia"
+]
 categoria_perguntas['valor_total_acordos'] = [
     r"valor total de acordos",
     r"qual o valor total dos acordos",
@@ -98,6 +111,7 @@ categoria_perguntas['transitaram_julgado'] = [
 
 categoria_perguntas['quantidade_processos_estado'] = [
     r"quantidade de processos por estado",
+    r"Divididos em quais estados",
     r"quantos processos existem em cada estado",
     r"numero de processos por estado",
     r"quantos processos por estado",
