@@ -886,10 +886,13 @@ def tratar_pergunta_proximas_audiencias(dataframe):
     if not proximas_audiencias.empty:
         resposta = "Verificando os dados encontrei:\n"
         for _, row in proximas_audiencias.iterrows():
-            data_audiencia = row['Data de Audiência'].strftime('%d/%m/%Y')
-            processo = row['Número CNJ']
-            local = row['Foro']
-            resposta += f"\n - Processo {processo} no foro {local} em {data_audiencia}\n"
+            resposta += (
+                f"\nProcesso {row['Número CNJ']} com audiência em {row['Data de Audiência'].strftime('%d/%m/%Y')}\n"
+                f"Local: {row['Vara']}\n"
+                f"Foro: {row['Foro']}\n"
+                f"Tipo: {row['Tipo de audiência']}\n"
+                f"Autor: {row['Envolvidos - Polo Ativo']}.\n\n"
+            )
     else:
         resposta = "Você não tem audiências futuras agendadas."
 

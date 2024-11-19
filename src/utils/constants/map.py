@@ -5,6 +5,8 @@ categoria_perguntas = defaultdict(list)
 
 categoria_perguntas['audiencia_dezembro'] =[
     r"Quantas audiencias teremos no mes de dezembro",
+    r"total de audiencias para o mes de dezembro",
+    r"quantas audiencias teremos em dezembro",
 ]
     
 categoria_perguntas['instancia_'] = [
@@ -60,8 +62,7 @@ categoria_perguntas['prox_audiencia'] = [ #error
     r"me informe sobre minhas proximas audiencias",
     r"teremos no mes de dezembro",
     r"agendadas para dezembro",
-    r"total de audiencias para o mes de dezembro",
-    r"quantas audiencias teremos em dezembro",
+    
     r"programadas para o proximo mes",
     r"para o mes de dezembro",
     r"teremos em dezembro",
@@ -201,7 +202,7 @@ categoria_perguntas['processos_ativos'] = [
     r"processos ativos estao",
     r"numero mais recente de processos ativo",
     r"quantidade total de processos ativos",
-    r"situacao atual dos processos ativos",
+    
     r"contagem atual de processos ativos",
     r"quantos processos ativos",
     r"processos ativos",

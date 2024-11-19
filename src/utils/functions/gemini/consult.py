@@ -54,7 +54,7 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
         else "Nenhum histórico de conversa disponível."
     )
 
-    incluir_contexto_dataframe = any(keyword in pergunta.lower() for keyword in ["dados", "dataframe", "mostrar"])
+    incluir_contexto_dataframe = any(keyword in pergunta.lower() for keyword in ["dados", "dataframe", "mostrar", "situação", "informações"])
 
     if incluir_contexto_dataframe:
         dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)

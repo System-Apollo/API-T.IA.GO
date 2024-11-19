@@ -84,7 +84,7 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'valor_condenacao_estado':
         return processar_valor_condenacao_por_estado(dataframe)
     elif categoria == 'divisao_resultados_processos':
-        return processar_sentenca(dataframe, pergunta)
+        return processar_sentenca(dataframe)
     elif categoria == 'estado_maior_valor_causa':
         return processar_maior_valor_causa_por_estado(dataframe)
     elif categoria == 'estado_maior_media_valor_causa':
