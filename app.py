@@ -8,12 +8,15 @@ from src.routes.users import user_bp
 from src.routes.tiago import main_bp
 from src.utils.config.extensions import db, jwt 
 from src.utils.functions.requests.control import processar_fila
+from datetime import timedelta
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
 
     app.config.from_prefixed_env()
+
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
 
     db.init_app(app)
     jwt.init_app(app)

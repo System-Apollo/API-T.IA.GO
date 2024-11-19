@@ -52,7 +52,9 @@ def remover_acentos(texto):
 
 
 def processar_pergunta(pergunta, dataframe, user_id):
+    print(f"Pergunta recebida: {pergunta}")
     pergunta_normalizada = normalizar_pergunta(pergunta)
+    print(f"Pergunta normalizada: {pergunta_normalizada}")
     grafico_data = None
     if user_id not in historico_conversa:
         historico_conversa[user_id] = []
@@ -82,15 +84,19 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'valor_condenacao_estado':
         return processar_valor_condenacao_por_estado(dataframe)
     elif categoria == 'divisao_resultados_processos':
-        return processar_sentenca(dataframe, pergunta)
+        return processar_sentenca(dataframe)
     elif categoria == 'estado_maior_valor_causa':
         return processar_maior_valor_causa_por_estado(dataframe)
     elif categoria == 'estado_maior_media_valor_causa':
         return processar_media_valor_causa_por_estado(dataframe)
     elif categoria == 'transitaram_julgado':
         return processar_transito_julgado(dataframe)
+    elif categoria == "instancia_":
+        return processar_instancia_por_cnj(dataframe)
     elif categoria == 'prox_audiencia':
         return tratar_pergunta_proximas_audiencias(dataframe)
+    elif categoria == 'audiencia_dezembro':
+        return tratar_pergunta_audiencias_dezembro(dataframe)
     elif categoria == 'quantidade_processos_estado':
         return processar_quantidade_processos_por_estado(dataframe)
     elif categoria == 'quantidade_processos_comarca':
@@ -140,4 +146,8 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'processos_nao_citados':
         return processar_nao_citados(dataframe)
     elif categoria == 'processo_mais_antigo':
-        return processar_processo_mais_antigo(dataframe) 
+        return processar_processo_mais_antigo(dataframe)
+    elif categoria == 'classe_cnj':
+        return processar_contagem_classe_cnj(dataframe)
+    elif categoria == 'valor_sentenca':
+        return processar_maior_valor_condenacao(dataframe)

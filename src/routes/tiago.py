@@ -21,11 +21,11 @@ def pergunta():
     user_id = claims.get('user_id')
     company = claims.get('company')
 
-    if company == 'Minha Empresa':
+    if company == 'MF Digital Law':
         df = carregar_dados('dados_falsos_processos_completos.xlsx')
         
     elif company == 'Teste':
-        df = carregar_dados('dados_user2.xlsx')
+        df = carregar_dados('dados_testes_tiago.xlsx')
 
     else:
         return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"})
