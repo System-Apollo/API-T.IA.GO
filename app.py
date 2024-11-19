@@ -8,13 +8,15 @@ from src.routes.users import user_bp
 from src.routes.tiago import main_bp
 from src.utils.config.extensions import db, jwt 
 from src.utils.functions.requests.control import processar_fila
-
+from datetime import timedelta
 
 def create_app():
     app = Flask(__name__)
     CORS(app)
 
     app.config.from_prefixed_env()
+
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=8)
 
     db.init_app(app)
     jwt.init_app(app)
@@ -29,22 +31,18 @@ def create_app():
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_headers, jwt_data):
         identity = jwt_data['sub']
-        return User.query.filter_by(username=identity).one_or_none()
+        return User.query.filter_by(id=identity).one_or_none()
 
     @jwt.additional_claims_loader
-    def make_additional_claims(identity):
-        if identity == "adminprojetos":
-            return {"is_staff": True}
+    def add_user_claims(identity):
+        user = User.query.filter_by(id=identity).one_or_none()
+        claims = {"is_staff": identity == "adminprojetos"}
 
-        return {"is_staff": False}
+        if user:
+            claims["user_id"] = user.id
+            claims["company"] = user.company
 
-    @jwt.additional_claims_loader
-    def add_user_claims_to_jwt(identity):
-        user = User.query.filter_by(username=identity).one_or_none()
-        if user is None:
-            return {}
-
-        return {"user_id": user.id}
+        return claims
 
     @jwt.expired_token_loader
     def expired_token_callback(_jwt_header, jwt_data):

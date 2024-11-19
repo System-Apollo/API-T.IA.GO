@@ -26,3 +26,27 @@ def get_all_users():
         )
 
     return jsonify({"message": "You are not logged in!"}), 403
+
+
+@user_bp.put("/update/{id}")
+@jwt_required()
+def update_user(email):
+    claims = get_jwt()
+    data = request.get_json()
+
+    if not (claims.get("is_staff")):
+        return jsonify({"message": "You are not logged in!"}), 403
+
+    user = User.get_email(email)
+
+    try:
+        user.set_username(f"{data['name']} + {data['last_name']}")
+        user.set_activity(data['activity'])
+        user.set_company(data['company'])
+        user.set_cpf_cnpj(data['cpf_cnpj'])
+
+        user.persist_to_db()
+
+        return jsonify({"message": "You have successfully updated!"}), 200
+    except Exception as e:
+        return jsonify({"message": f"error: {str(e)}"}), 403

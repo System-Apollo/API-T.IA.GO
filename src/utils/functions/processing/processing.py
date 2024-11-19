@@ -8,6 +8,8 @@ try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 except locale.Error:
     locale.setlocale(locale.LC_ALL, '')
+import unicodedata
+
 
 
 
@@ -57,29 +59,20 @@ def processar_divisao_por_rito(dataframe):
 
 
 def processar_maior_tempo_sem_movimentacao(dataframe):
-    # Converter as colunas 'Data de distribuição' e 'Última mov.' para o formato datetime
-    dataframe['Data de distribuição'] = pd.to_datetime(dataframe['Data de distribuição'], format='%d/%m/%Y',
-                                                       errors='coerce')
-    dataframe['Última mov.'] = pd.to_datetime(dataframe['Última mov.'], format='%d/%m/%Y', errors='coerce')
 
-    # Calcular a diferença de dias entre 'Última mov.' e 'Data de distribuição'
-    dataframe['Dias sem movimentação'] = (dataframe['Última mov.'] - dataframe['Data de distribuição']).dt.days
+    dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
+    dataframe['Dias sem movimentação'] = (dataframe['Data do Última mov.'] - dataframe['Data da distribuição']).dt.days
 
-    # Identificar o processo com maior tempo sem movimentação
     processo_maior_tempo = dataframe.loc[dataframe['Dias sem movimentação'].idxmax()]
 
-    # Extrair os dados do processo
     numero_processo = processo_maior_tempo['Número CNJ']
     dias_sem_movimentacao = processo_maior_tempo['Dias sem movimentação']
 
-    # Selecionar os 4 processos com maior tempo sem movimentação
-    top_4_processos = dataframe[['Número CNJ', 'Dias sem movimentação']].sort_values(by='Dias sem movimentação',
-                                                                                     ascending=False).head(4)
+    top_4_processos = dataframe[['Número CNJ', 'Dias sem movimentação']].sort_values(by='Dias sem movimentação', ascending=False).head(4)
 
-    # Preparar os dados para o gráfico
     dados_grafico = top_4_processos.set_index('Número CNJ').to_dict()['Dias sem movimentação']
 
-    # Retornar a resposta e os dados para o gráfico
     return f"O processo com maior tempo sem movimentação é o número {numero_processo}, com {dias_sem_movimentacao} dias sem movimentação.", {
         "processos": dados_grafico
     }
@@ -631,56 +624,48 @@ def processar_media_valor_causa_por_estado(dataframe):
 
 
 def processar_maior_valor_causa_por_estado(dataframe):
-    # Converter a coluna 'Total da causa' para string, limpar e converter para float
-    dataframe['Total da causa'] = dataframe['Total da causa'].astype(str).str.replace('R$', '', regex=False)\
+
+    dataframe['Valor de causa (R$)'] = dataframe['Valor de causa (R$)'].astype(str).str.replace('R$', '', regex=False)\
         .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
 
-    # Converter para numérico, tratando erros como NaN
-    dataframe['Total da causa'] = pd.to_numeric(dataframe['Total da causa'], errors='coerce')
-
-    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
+    print(dataframe['Valor de causa (R$)'])
+    dataframe['Valor de causa (R$)'] = pd.to_numeric(dataframe['Valor de causa (R$)'], errors='coerce')
+    print(dataframe['Valor de causa (R$)'])
     dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
 
-    # Agrupar por estado e somar os valores de 'Total da causa'
-    soma_por_estado = dataframe.groupby('Estado')['Total da causa'].sum()
-
-    # Encontrar o estado com o maior valor de causa
+    soma_por_estado = dataframe.groupby('Estado')['Valor de causa (R$)'].sum()
+    print(soma_por_estado)
     estado_com_maior_valor = soma_por_estado.idxmax()
     maior_valor = soma_por_estado.max()
+    print(maior_valor)
 
-    # Criar a resposta textual, formatando o valor no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = f"O estado com o maior valor de causa é {estado_com_maior_valor}, com um total de R$ {maior_valor:,.2f}".replace(
         ',', 'X').replace('.', ',').replace('X', '.')
 
-     # Retornar os dados em um formato serializável para o gráfico
     return resposta_texto, {
         "valor_causa_por_estado": soma_por_estado.to_dict()
     }
 
 def processar_valor_condenacao_por_estado(dataframe):
-    # Converter os valores da coluna 'Valor de condenação (R$)' para string e remover 'R$', '.', e ',' para transformar em float
-    dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
-                                                                                                          regex=False).str.replace(
-        '.', '', regex=False).str.replace(',', '.', regex=False)
 
-    # Converter a coluna para valores numéricos, tratando os erros como NaN
+    dataframe['Valor de condenação (R$)'] = (dataframe['Valor de condenação (R$)']
+                                             .astype(str)
+                                             .str.replace('R$', '', regex=False)
+                                             .str.replace('.', '', regex=False)
+                                             .str.replace(',', '.', regex=False))
+
     dataframe['Valor de condenação (R$)'] = pd.to_numeric(dataframe['Valor de condenação (R$)'], errors='coerce')
-
-    # Criar uma nova coluna extraindo apenas as siglas dos estados da coluna 'Foro'
     dataframe['Estado'] = dataframe['Foro'].str.extract(r'([A-Z]{2})')
 
-    # Agrupar por estado e somar os valores
     soma_por_estado = dataframe.groupby('Estado')['Valor de condenação (R$)'].sum()
 
-    # Criar a resposta textual, formatando os valores no estilo brasileiro (R$ X.XXX,XX)
     resposta_texto = "O valor total de condenações por estado é:\n"
     resposta_texto += "\n".join(
         [f"{estado}: R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.') for estado, valor in
          soma_por_estado.items()])
-    
-    # Retornar os dados em um formato serializável para o gráfico
+
     return resposta_texto, {
-        "condenacao_por_estado": soma_por_estado.to_dict()  # Retorna um dicionário com os valores para o gráfico
+        "condenacao_por_estado": soma_por_estado.to_dict()
     }
     
 
@@ -693,19 +678,19 @@ def processar_status(pergunta, dataframe, status):
 
     # Retornar a chave correta dependendo do status
     if status_lower == 'ativo':
-        return f"Atualmente, há {quantidade} processos ativos.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos ativos.", {
             "ativos": quantidade,
             "arquivados": dataframe[dataframe['Status'].str.lower() == 'arquivado'].shape[0]
             # Adicionar arquivados para gráfico comparativo
         }
     elif status_lower == 'arquivado':
-        return f"Atualmente, há {quantidade} processos arquivados/encerrados.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos arquivados/encerrados.", {
             "ativos": dataframe[dataframe['Status'].str.lower() == 'ativo'].shape[0],
             # Adicionar ativos para gráfico comparativo
             "arquivados": quantidade
         }
     else:
-        return f"Atualmente, há {quantidade} processos {status}.", {
+        return f"Verifiquei aqui e atualmente, há {quantidade} processos {status}.", {
             "status": quantidade
         }
 
@@ -754,15 +739,14 @@ def processar_fase(dataframe, pergunta=None):
     }
 
 
-# Função auxiliar para processar perguntas sobre "Resultado da Sentença"
-def processar_sentenca(dataframe, pergunta):
-    # Verificar se a coluna 'Resultado da Sentença' existe no DataFrame
+
+def processar_sentenca(dataframe):
+
     if 'Resultado da Sentença' not in dataframe.columns:
         return "Erro: A coluna 'Resultado da Sentença' não foi encontrada no arquivo de dados.", {}
-    # Contar a ocorrência dos diferentes resultados de sentença, normalizando para lowercase
+
     sentencas = dataframe['Resultado da Sentença'].str.lower().value_counts().to_dict()
 
-    # Dicionário de abreviações para os resultados das sentenças
     abreviacoes_sentencas = {
         "sentenca improcedente": "Improcedente",
         "sentenca de extincao sem resolucao do merito": "Sem resolução do mérito",
@@ -770,13 +754,10 @@ def processar_sentenca(dataframe, pergunta):
         "sentenca de homologacao de acordo": "Acordo"
     }
 
-    # Substituir os nomes completos pelas abreviações no dicionário de sentenças
     sentencas_abreviadas = {abreviacoes_sentencas.get(key, key): value for key, value in sentencas.items()}
 
-    # Gerar o texto da resposta com a divisão dos resultados das sentenças
     sentencas_texto = ", ".join([f"{sentenca}: {quantidade}" for sentenca, quantidade in sentencas_abreviadas.items()])
 
-    # Retornar a resposta com a distribuição dos resultados
     return f"Os resultados das sentenças estão distribuídos da seguinte forma: {sentencas_texto}.", {
         "sentencas": sentencas_abreviadas
     }
@@ -784,36 +765,31 @@ def processar_sentenca(dataframe, pergunta):
 
 def processar_valor_acordo(dataframe):
     if 'Valor de acordo (R$)' in dataframe.columns:
-        # Garantir que todos os valores estão no formato de string
+
+
         dataframe['Valor de acordo (R$)'] = dataframe['Valor de acordo (R$)'].astype(str)
 
-        # Remover símbolos de moeda e converter valores para numéricos
         dataframe['Valor de acordo (R$)'] = (
             dataframe['Valor de acordo (R$)']
-            .str.replace('R$', '', regex=False)  # Remover o símbolo 'R$'
-            .str.replace('.', '', regex=False)  # Remover os pontos dos milhares
-            .str.replace(',', '.', regex=False)  # Substituir vírgula por ponto para decimal
+            .str.replace('R$', '', regex=False)
+            .str.replace('.', '', regex=False)
+            .str.replace(',', '.', regex=False)
         )
 
-        # Converter os valores da coluna para numéricos
         dataframe['Valor de acordo (R$)'] = pd.to_numeric(dataframe['Valor de acordo (R$)'], errors='coerce')
 
-        # Somar os valores, ignorando os NaN
         valor_total_acordo = dataframe['Valor de acordo (R$)'].sum()
 
-        # Contar quantos valores de acordo existem (sem contar valores 0)
         quantidade_acordos = dataframe[dataframe['Valor de acordo (R$)'] > 0]['Valor de acordo (R$)'].count()
 
-        # Preparar dados para gráfico (quantidade e valor total), convertendo para tipos JSON-serializáveis
         grafico_data = {
-            "Quantidade de Acordos": int(quantidade_acordos),  # Converter para int
-            "Valor Total": float(valor_total_acordo)  # Converter para float
+            "Quantidade de Acordos": int(quantidade_acordos),
+            "Valor Total": float(valor_total_acordo)
         }
 
-        # Formatar o valor total no formato de moeda brasileiro
-        valor_total_acordo_formatado = locale.currency(valor_total_acordo, grouping=True, symbol=True)
+        valor_total_acordo_formatado = f"R$ {valor_total_acordo:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-        # Retornar a resposta e os dados para o gráfico
+
         return f"O valor total dos acordos é de R$ {valor_total_acordo_formatado} com {quantidade_acordos} acordos.", grafico_data
     else:
         return "Não foi possível calcular o valor total dos acordos, coluna 'Valor do acordo' não encontrada.", {}
@@ -899,30 +875,29 @@ def processar_semana(dataframe, coluna, pergunta):
     return f"Não foi possível identificar a semana especificada.", {}
 
 def tratar_pergunta_proximas_audiencias(dataframe):
-    # Supondo que o dataframe tenha uma coluna chamada 'Data da Audiência' com as datas das audiências
-    # Vamos converter as datas para o formato datetime
+
     dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
 
-    # Filtrar as audiências que são futuras (a partir da data de hoje)
     hoje = datetime.now()
     proximas_audiencias = dataframe[dataframe['Data de Audiência'] >= hoje]
 
-    # Ordenar pela Data de Audiência
     proximas_audiencias = proximas_audiencias.sort_values(by='Data de Audiência')
 
-    # Se houver audiências futuras
     if not proximas_audiencias.empty:
         resposta = "Verificando os dados encontrei:\n"
         for _, row in proximas_audiencias.iterrows():
-            data_audiencia = row['Data de Audiência'].strftime('%d/%m/%Y')
-            processo = row['Número CNJ']
-            local = row['Foro']
-            resposta += f"\n - Processo {processo} no foro {local} em {data_audiencia}\n"
+            resposta += (
+                f"\nProcesso {row['Número CNJ']} com audiência em {row['Data de Audiência'].strftime('%d/%m/%Y')}\n"
+                f"Local: {row['Vara']}\n"
+                f"Foro: {row['Foro']}\n"
+                f"Tipo: {row['Tipo de audiência']}\n"
+                f"Autor: {row['Envolvidos - Polo Ativo']}.\n\n"
+            )
     else:
         resposta = "Você não tem audiências futuras agendadas."
 
-    # Retornar a resposta
     return resposta,{}
+
 
 def processar_processo_mais_antigo(dataframe):
     # Converter a coluna 'Data da distribuição' para o tipo datetime, ignorando erros de conversão
@@ -953,3 +928,128 @@ def processar_processo_mais_antigo(dataframe):
     else:
         resposta = "Nenhum processo encontrado com uma data válida."
         return resposta, {}
+
+def processar_contagem_classe_cnj(df):
+
+    if 'Classe CNJ' not in df.columns:
+        raise ValueError("A coluna 'Classe CNJ' não está presente no DataFrame fornecido.")
+
+    total = int(df["Classe CNJ"].count())
+    trabalhista_count = df['Classe CNJ'].str.contains('Ação Trabalhista', case=False, na=False).sum()
+    penal_count = df['Classe CNJ'].str.contains('Ação Penal', case=False, na=False).sum()
+    civel_count = df['Classe CNJ'].str.contains('Ação Civel', case=False, na=False).sum()
+
+
+    return f"Dos {total}, afirmo que são {trabalhista_count} trabalhistas, {penal_count} penais e {civel_count} cíveis.", {}
+
+def processar_maior_valor_condenacao(df):
+
+    if 'Valor de condenação (R$)' not in df.columns:
+        raise ValueError("A coluna 'Valor de condenação (R$)' não está presente no DataFrame fornecido.")
+
+    row_regex = (
+        df['Valor de condenação (R$)']
+        .str.replace('R$', '', regex=False)
+        .str.replace('.', '', regex=False)
+        .str.replace(',', '.', regex=False)
+    )
+
+    row_number = pd.to_numeric(row_regex, errors='coerce')
+
+    linha_maxima = df.loc[row_number.idxmax()]
+    valor_condenacao = linha_maxima['Valor de condenação (R$)']
+    numero_cnj = linha_maxima['Número CNJ']
+    orgao = linha_maxima['Órgão']
+
+    return f"A sentença mais elevada foi no caso de número {numero_cnj} no valor de {valor_condenacao} em trâmite no {orgao}", {}
+
+def processar_instancia_por_cnj(dataframe):
+    # Preencher valores nulos ou traços na coluna 'Instância' e 'Resultado da Sentença'
+    dataframe['Instância'] = dataframe['Instância'].fillna('Sem instância')
+    dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].replace('-', 'Sem sentença').fillna('Sem sentença')
+
+    # Manter apenas processos com "Sentença Procedente" ou "Sentença Improcedente"
+    dataframe = dataframe[dataframe['Resultado da Sentença'].str.contains("Procedente|Improcedente", case=False, na=False)]
+
+    # Filtrar as linhas com números CNJ válidos
+    dataframe = dataframe.dropna(subset=['Número CNJ'])
+
+    # Filtrar processos na "Primeira instância"
+    primeira_instancia = dataframe[dataframe['Instância'].str.contains("Primeira instância", case=False, na=False)]
+    total_primeira_instancia = len(primeira_instancia)
+
+    # Contar processos com sentença procedente na Primeira Instância
+    procedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Procedente", case=False, na=False)]
+    total_procedentes = len(procedentes)
+
+    # Contar processos com sentença improcedente na Primeira Instância
+    improcedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Improcedente", case=False, na=False)]
+    total_improcedentes = len(improcedentes)
+
+    # Resposta textual para a pergunta "algum deles foram julgados em primeira instância?"
+    resposta = (
+        f"Sim, temos {total_procedentes} processos com sentença procedente na Primeira Instância e "
+        f"{total_improcedentes} processos com sentença improcedente."
+    )
+
+    # Dados para gráficos
+    grafico_data = {
+        "Sentenças Procedentes": total_procedentes,
+        "Sentenças Improcedentes": total_improcedentes,
+    }
+
+    return resposta, grafico_data
+
+
+def calcular_media_condenacao_julho(df):
+    if 'Valor de condenação (R$)' not in df.columns or 'Data' not in df.columns:
+        raise ValueError("As colunas 'Valor de condenação (R$)' e 'Data' precisam estar presentes no DataFrame fornecido.")
+
+    # Filtrar as linhas do mês de julho
+    df['Data'] = pd.to_datetime(df['Data'], errors='coerce')  # Garantir que a coluna 'Data' esteja no formato datetime
+    df_julho = df[df['Data'].dt.month == 7]
+
+    if df_julho.empty:
+        return "Não há dados de condenações no mês de julho.", {}
+
+    # Processar os valores de condenação
+    valores = (
+        df_julho['Valor de condenação (R$)']
+        .str.replace('R$', '', regex=False)
+        .str.replace('.', '', regex=False)
+        .str.replace(',', '.', regex=False)
+    )
+    valores_numeric = pd.to_numeric(valores, errors='coerce')
+
+    # Calcular a média
+    media_condenacao = valores_numeric.mean()
+
+    if pd.isna(media_condenacao):
+        return "Não foi possível calcular a média, pois os valores de condenação estão ausentes ou inválidos.", {}
+
+    return {}
+
+
+    
+def tratar_pergunta_audiencias_dezembro(dataframe):
+    dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
+    audiencias_dezembro = dataframe[dataframe['Data de Audiência'].dt.month == 12]
+    audiencias_dezembro = audiencias_dezembro.sort_values(by='Data de Audiência')
+
+    if not audiencias_dezembro.empty:
+        resposta = f"Encontrei {len(audiencias_dezembro)} audiências agendadas para o mês de dezembro:\n"
+        for _, row in audiencias_dezembro.iterrows():
+            resposta += (
+                f"\nProcesso {row['Número CNJ']} com audiência em {row['Data de Audiência'].strftime('%d/%m/%Y')}\n"
+                f"Local: {row['Vara']}\n"
+                f"Foro: {row['Foro']}\n"
+                f"Tipo: {row['Tipo de audiência']}\n"
+                f"Autor: {row['Envolvidos - Polo Ativo']}.\n\n"
+            )
+    else:
+        resposta = "Não há audiências agendadas para o mês de dezembro."
+
+    return resposta.strip(), {}
+
+
+
