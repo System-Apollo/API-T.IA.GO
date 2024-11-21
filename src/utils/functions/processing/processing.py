@@ -968,6 +968,15 @@ def processar_instancia_por_cnj(dataframe):
     dataframe['Instância'] = dataframe['Instância'].fillna('Sem instância')
     dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].replace('-', 'Sem sentença').fillna('Sem sentença')
 
+    # Mapear valores de "1ª" para "Primeira Instância" e "2ª" para "Segunda Instância"
+    instancia_map = {
+        '1ª': 'Primeira Instância',
+        '2ª': 'Segunda Instância',
+        '3ª': 'Terceira Instância',
+        
+    }
+    dataframe['Instância'] = dataframe['Instância'].replace(instancia_map)
+
     # Manter apenas processos com "Sentença Procedente" ou "Sentença Improcedente"
     dataframe = dataframe[dataframe['Resultado da Sentença'].str.contains("Procedente|Improcedente", case=False, na=False)]
 
@@ -975,7 +984,7 @@ def processar_instancia_por_cnj(dataframe):
     dataframe = dataframe.dropna(subset=['Número CNJ'])
 
     # Filtrar processos na "Primeira instância"
-    primeira_instancia = dataframe[dataframe['Instância'].str.contains("Primeira instância", case=False, na=False)]
+    primeira_instancia = dataframe[dataframe['Instância'] == 'Primeira Instância']
     total_primeira_instancia = len(primeira_instancia)
 
     # Contar processos com sentença procedente na Primeira Instância

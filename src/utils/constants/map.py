@@ -176,7 +176,7 @@ categoria_perguntas['processos_ativos'] = [
     r"gostaria de saber quantos processos ativos",
     r"processos ativos eu tenho na base",
     r"pode me informar o numero de processos ativos",
-    r" total de processos ativos",
+    r"total de processos ativos",
     r"ativos na base hoje",
     r"consultar quantos processos ativos",
     r"processos estao ativos",
@@ -202,7 +202,6 @@ categoria_perguntas['processos_ativos'] = [
     r"processos ativos estao",
     r"numero mais recente de processos ativo",
     r"quantidade total de processos ativos",
-    
     r"contagem atual de processos ativos",
     r"quantos processos ativos",
     r"processos ativos",
