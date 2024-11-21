@@ -36,7 +36,12 @@ def create_app():
     @jwt.additional_claims_loader
     def add_user_claims(identity):
         user = User.query.filter_by(id=identity).one_or_none()
-        claims = {"is_staff": identity == "adminprojetos"}
+
+        staff = False
+        if user.email == 'projetos@meirelesefreias.adv.br':
+            staff = True
+
+        claims = {"is_staff": staff}
 
         if user:
             claims["user_id"] = user.id
