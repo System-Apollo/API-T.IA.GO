@@ -28,7 +28,7 @@ def get_all_users():
     return jsonify({"message": "You are not logged in!"}), 403
 
 
-@user_bp.put("/update/{id}")
+@user_bp.put("/update/<string:email>")
 @jwt_required()
 def update_user(email):
     claims = get_jwt()
@@ -45,7 +45,7 @@ def update_user(email):
         user.set_company(data['company'])
         user.set_cpf_cnpj(data['cpf_cnpj'])
 
-        user.persist_to_db()
+        user.update_in_db()
 
         return jsonify({"message": "You have successfully updated!"}), 200
     except Exception as e:

@@ -73,5 +73,5 @@ class User(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def persist_in_db(self):
+    def update_in_db(self):
         db.session.commit()
