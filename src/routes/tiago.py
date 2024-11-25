@@ -26,6 +26,9 @@ def pergunta():
         
     elif company == 'Teste':
         df = carregar_dados('dados_testes_tiago.xlsx')
+        
+    elif company == 'André Menescal Advogados':
+        df =carregar_dados('Legal One.xlsx')
 
     else:
         return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"})

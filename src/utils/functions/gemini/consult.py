@@ -7,30 +7,59 @@ RPM = 15
 RPD = 1500
 
 def filtrar_dataframe(pergunta, dataframe):
+    # Mapeamento de palavras-chave para colunas
+    mapa_colunas = {
+        "envolvido": ["Advogados polo ativo", "Advogados polo passivo"],
+        "cnj": ["Número CNJ"],
+        "assunto": ["Assuntos"],
+        "classe": ["Classe CNJ"],
+        "foro": ["Foro"],
+        "data": [
+            "Data da distribuição", "Data de cadastro", "Data de recurso",
+            "Data do acórdão", "Data de Sessão de Julgamento", "Data da última audiência realizada",
+            "Data da próxima audiência", "Data do último recurso apresentado"
+        ],
+        "valor": ["Valor de acordo (R$)", "Valor de causa (R$)", "Valor de condenação (R$)", "Valor de custas (R$)"],
+        "resultado": ["Resultado da Sentença"],
+        "status": ["Status"],
+        "rito": ["Rito"],
+        "instância": ["Instância"],
+        "teses": ["Teses de Defesa"]
+    }
+
+    # Identificar colunas relevantes com base na pergunta
+    colunas_relevantes = set()
+    for palavra, colunas in mapa_colunas.items():
+        if palavra in pergunta.lower():
+            colunas_relevantes.update(colunas)
+
+    # Garantir colunas padrão caso nenhuma palavra-chave seja detectada
+    if not colunas_relevantes:
+        colunas_relevantes = {"Número CNJ", "Classe CNJ", 
+                              "Status", "Envolvidos - Polo Ativo", 
+                              "Órgão",'Foro','Data da sentença',
+                              'Data do arquivamento','UF',
+                              'Valor de condenação (R$)',	'Valor de causa (R$)',
+                             ' Data da próxima audiência',	'Data do Última mov.',
+                             'Desfecho','Instância', 'Juízes'																																																																																	
+}
+
+    # Verificar quais colunas existem no DataFrame
+    colunas_existentes = [col for col in colunas_relevantes if col in dataframe.columns]
+
+    if not colunas_existentes:
+        return f"A pergunta faz referência a colunas que não estão disponíveis na base de dados: {', '.join(colunas_relevantes)}.", dataframe.head(5)
+
+    # Filtrar colunas existentes
+    dataframe_filtrado = dataframe[colunas_existentes]
+
+    # Filtrar linhas com base nas palavras-chave presentes na pergunta
     palavras_chave = pergunta.split()
-
-    df_filtrado = dataframe[
-        dataframe['Envolvidos - Polo Ativo'].str.contains('|'.join(palavras_chave), case=False, na=False)
+    dataframe_filtrado = dataframe_filtrado[
+        dataframe_filtrado.apply(lambda row: any(str(value).lower() in pergunta.lower() for value in row), axis=1)
     ]
 
-    colunas_dataframe = [
-        "Número CNJ", "Assuntos", "Classe CNJ", "Foro",
-        "Data da distribuição", "Data de cadastro", "Data de citação", "Data da sentença", "Data do acordo",
-        "Data do arquivamento", "Data do primeiro acórdão", "Data do trânsito em julgado", "Data do Última mov.",
-        "Decisões por instância", "Rito", "Desfecho", "Desfecho do pedido de substituição", "Fase",
-        "Indicativo de bloqueio?", "Instância", "Juízes",
-        "Envolvidos - Polo Ativo", "Envolvidos - Polo Passivo", "Resultado da Sentença",
-        "Possui pedido de substituição", "Segredo de justiça?", "Status", "Tipo de alteração da condenação",
-        "Tipos de recursos", "Órgão",
-        "TST - Data do trânsito em julgado", "TST - Fase atual", "TST - Órgão judiciante",
-        "UF", "Ultimo movimento",
-        "Valor de acordo (R$)", "Valor de causa (R$)", "Valor de condenação (R$)", "Valor de custas (R$)",
-        "Vara", "Data de Audiência", "Data de Contestação", "Data de recurso",
-        "Tipo de audiência", "Data do acórdão", "Data de Sessão de Julgamento", "Data da última audiência realizada",
-        "Data da próxima audiência", "Data do último recurso apresentado", "Tipo de Recurso",
-    ]
-
-    return df_filtrado[colunas_dataframe] if not df_filtrado.empty else dataframe[colunas_dataframe].head(5)
+    return dataframe_filtrado
 
 def configurar_gemini():
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -54,13 +83,12 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
         else "Nenhum histórico de conversa disponível."
     )
 
-    incluir_contexto_dataframe = any(keyword in pergunta.lower() for keyword in ["dados", "dataframe", "mostrar", "situação", "informações"])
+    
 
-    if incluir_contexto_dataframe:
-        dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
-        contexto_dataframe = dataframe_filtrado.to_string(index=False)
-    else:
-        contexto_dataframe = "Nenhum dado solicitado para esta interação."
+    
+    dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
+    contexto_dataframe = dataframe_filtrado.to_string(index=False)
+
 
     prompt = (f"Usuário que você está conversando (seja gentil com ele(a)): {user.username}\n\n"
               f"Use saudações com esse usuário quando for requisitado. "

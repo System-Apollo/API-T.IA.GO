@@ -10,10 +10,24 @@ except locale.Error:
     locale.setlocale(locale.LC_ALL, '')
 import unicodedata
 
-
+def verificar_colunas(dataframe, colunas_necessarias):
+    """
+    Verifica se as colunas necessárias estão presentes no DataFrame.
+    Retorna True se todas estiverem presentes, ou False e uma lista das colunas ausentes.
+    """
+    colunas_ausentes = [col for col in colunas_necessarias if col not in dataframe.columns]
+    if colunas_ausentes:
+        return False, colunas_ausentes
+    return True, []
 
 
 def processar_nao_citados(dataframe):
+    colunas_necessarias = ['Data de citação']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
     # Contar processos que ainda não têm data de citação (processos não citados)
     processos_nao_citados = dataframe[dataframe['Data de citação'].isna()].shape[0]
 
@@ -28,6 +42,11 @@ def processar_nao_citados(dataframe):
 
 
 def processar_nao_julgados(dataframe):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Considerar como processos não julgados aqueles sem resultado de sentença
     processos_nao_julgados = dataframe[
         dataframe['Resultado da Sentença'].isnull() | dataframe['Resultado da Sentença'].str.contains('não', case=False,
@@ -43,6 +62,11 @@ def processar_nao_julgados(dataframe):
 
 
 def processar_divisao_por_rito(dataframe):
+    colunas_necessarias = ['Rito']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Contar a quantidade de processos por tipo de Rito
     ritos = dataframe['Rito'].str.lower().value_counts().to_dict()
 
@@ -59,6 +83,11 @@ def processar_divisao_por_rito(dataframe):
 
 
 def processar_maior_tempo_sem_movimentacao(dataframe):
+    colunas_necessarias = ['Data da distribuição', 'Data do Última mov.', 'Dias sem movimentação']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y', errors='coerce')
     dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
@@ -79,6 +108,11 @@ def processar_maior_tempo_sem_movimentacao(dataframe):
 
 
 def processar_sentencas_extinto_sem_custos(dataframe):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter a coluna 'Resultado da Sentença' para minúsculas para garantir consistência
     dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].str.lower()
 
@@ -111,6 +145,11 @@ def processar_sentencas_extinto_sem_custos(dataframe):
 
 
 def processar_sentencas_improcedentes(dataframe):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter a coluna 'Resultado da Sentença' para minúsculas para garantir consistência
     dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].str.lower()
 
@@ -138,6 +177,11 @@ def processar_sentencas_improcedentes(dataframe):
 
 
 def processar_sentencas_procedentes(dataframe):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter a coluna 'Resultado da Sentença' para minúsculas para garantir consistência
     dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].str.lower()
 
@@ -166,6 +210,11 @@ def processar_sentencas_procedentes(dataframe):
 
 
 def processar_media_duracao_por_estado(dataframe):
+    colunas_necessarias = ['Data do Última mov.', 'Data da distribuição', 'Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter as colunas 'Última mov.' e 'Data de distribuição' para datetime, corrigindo o formato
     dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y',
@@ -200,6 +249,11 @@ def processar_media_duracao_por_estado(dataframe):
 
 
 def processar_media_duracao_por_comarca(dataframe):
+    colunas_necessarias = ['Data do Última mov.', 'Data da distribuição', 'Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter as colunas 'Última mov.' e 'Data de distribuição' para datetime, corrigindo o formato
     dataframe['Data do Última mov.'] = pd.to_datetime(dataframe['Data do Última mov.'], format='%d/%m/%Y', errors='coerce')
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], format='%d/%m/%Y',
@@ -234,6 +288,11 @@ def processar_media_duracao_por_comarca(dataframe):
 
 
 def processar_media_duracao_processos_arquivados(dataframe):
+    colunas_necessarias = ['Status', 'Última mov.', 'Data de distribuição']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Filtrar os processos arquivados
     processos_arquivados = dataframe[dataframe['Status'].str.lower() == 'arquivado']
 
@@ -272,6 +331,11 @@ def extrair_comarca(foro):
 
 
 def processar_comarca_mais_preocupante(dataframe):
+    colunas_necessarias = ['Foro', 'Valor de condenação (R$)']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Extrair a comarca (município) da coluna 'Foro'
     dataframe['Comarca'] = dataframe['Foro'].apply(extrair_comarca)
 
@@ -304,6 +368,11 @@ def processar_comarca_mais_preocupante(dataframe):
 
 
 def processar_estado_mais_ofensor(dataframe):
+    colunas_necessarias = ['Foro', 'Valor de condenação (R$)']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Garantir que todos os valores na coluna 'Total deferido' sejam strings antes de aplicar as substituições
     dataframe['Valor de condenação (R$)'] = dataframe['Valor de condenação (R$)'].astype(str).str.replace('R$', '',
                                                                                       regex=False).str.replace('.', '',
@@ -329,6 +398,11 @@ def processar_estado_mais_ofensor(dataframe):
 
 
 def processar_reclamantes_multiplos(dataframe):
+    colunas_necessarias = ['Envolvidos - Polo Ativo']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Remover qualquer tipo de espaço antes e depois dos nomes
     dataframe['Envolvidos - Polo Ativo'] = dataframe['Envolvidos - Polo Ativo'].str.strip()
 
@@ -349,6 +423,11 @@ def processar_reclamantes_multiplos(dataframe):
 
 
 def processar_rito(dataframe):
+    colunas_necessarias = ['Rito']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Contar a quantidade de processos por tipo de rito
     ritos = dataframe['Rito'].str.lower().value_counts().to_dict()
 
@@ -361,6 +440,11 @@ def processar_rito(dataframe):
 
 
 def processar_tribunal_acoes_convenções(dataframe):
+    colunas_necessarias = ['Assuntos','Órgão']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Filtrar as linhas onde o assunto é "Acordo e Convenção Coletivos de Trabalho"
     convenções = dataframe[
         dataframe['Assuntos'].str.contains('Acordo e Convenção Coletivos de Trabalho', case=False, na=False)]
@@ -381,6 +465,11 @@ def processar_tribunal_acoes_convenções(dataframe):
 
 # Função para processar os assuntos mais recorrentes
 def processar_assuntos_recorrentes(dataframe):
+    colunas_necessarias = ['Assuntos']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Contar a frequência dos assuntos na coluna "Assuntos"
     assuntos = dataframe['Assuntos'].str.lower().value_counts().to_dict()
 
@@ -418,6 +507,11 @@ def abreviar_assuntos(assunto):
 
 # Função para processar a quantidade de recursos interpostos
 def processar_quantidade_recursos(dataframe):
+    colunas_necessarias = ['Tipos de recursos']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Remover espaços extras e converter para minúsculas para evitar problemas de formatação
     dataframe['Tipos de recursos'] = dataframe['Tipos de recursos'].str.strip().str.lower()
 
@@ -435,6 +529,11 @@ def processar_quantidade_recursos(dataframe):
 
 
 def processar_quantidade_processos_por_estado(dataframe):
+    colunas_necessarias = ['Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Extrair o estado de cada valor na coluna 'Foro' e criar uma nova coluna 'Estado'
     dataframe['Estado'] = dataframe['Foro'].apply(
         lambda x: re.search(r' - ([A-Z]{2})$', str(x)).group(1) if re.search(r' - ([A-Z]{2})$', str(x)) else None)
@@ -458,6 +557,11 @@ def processar_quantidade_processos_por_estado(dataframe):
 
 
 def processar_quantidade_processos_por_comarca(dataframe):
+    colunas_necessarias = ['Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Extrair o município de cada valor na coluna 'Foro', removendo o estado
     dataframe['Municipio'] = dataframe['Foro'].apply(lambda x: str(x).split(' - ')[0] if ' - ' in str(x) else x)
 
@@ -479,6 +583,11 @@ def processar_quantidade_processos_por_comarca(dataframe):
 
 # Função para contagem de numero de processo ,e separa por ativos e arquivados
 def processar_quantidade_processos(dataframe):
+    colunas_necessarias = ['Número CNJ']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Contar a quantidade total de processos
     total_processos = int(dataframe['Número CNJ'].count())
 
@@ -495,6 +604,11 @@ def processar_quantidade_processos(dataframe):
 
 # Função auxiliar para processar perguntas sobre "Data de Trânsito em Julgado"
 def processar_transito_julgado(dataframe):
+    colunas_necessarias = ['Data do trânsito em julgado']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Verificar quais células da coluna 'Data de Trânsito em Julgado' têm data e quais estão vazias
     transitado = dataframe['Data do trânsito em julgado'].notna() & dataframe['Data do trânsito em julgado'].apply(
         lambda x: str(x).strip() != '-')
@@ -510,6 +624,11 @@ def processar_transito_julgado(dataframe):
 
 # Função auxiliar para processar perguntas sobre "Resultado da Sentença"
 def processar_sentenca(dataframe, pergunta):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     sentencas = dataframe['Resultado da Sentença'].str.lower().value_counts().to_dict()
 
     # Dicionário de abreviações para as sentenças
@@ -556,6 +675,11 @@ def processar_sentenca(dataframe, pergunta):
 
 # Função para processar o valor total da causa
 def processar_valor_total_causa(dataframe):
+    colunas_necessarias = ['Valor de causa (R$)', 'Status']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Converter a coluna 'Total da causa' para string e depois para valores numéricos (removendo símbolos de moeda e ajustando formatação)
     dataframe['Valor de causa (R$)'] = pd.to_numeric(
         dataframe['Valor de causa (R$)']
@@ -590,6 +714,12 @@ def processar_valor_total_causa(dataframe):
 
 
 def processar_media_valor_causa_por_estado(dataframe):
+    colunas_necessarias = ['Valor de causa (R$)','Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
     # Verificar se a coluna "Total da causa" é do tipo string e, se não for, converter para string
     if dataframe['Valor de causa (R$)'].dtype != 'object':
         dataframe['Valor de causa (R$)'] = dataframe['Valor de causa (R$)'].astype(str)
@@ -624,6 +754,11 @@ def processar_media_valor_causa_por_estado(dataframe):
 
 
 def processar_maior_valor_causa_por_estado(dataframe):
+    colunas_necessarias = ['Valor de causa (R$)','Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     dataframe['Valor de causa (R$)'] = dataframe['Valor de causa (R$)'].astype(str).str.replace('R$', '', regex=False)\
         .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
@@ -647,6 +782,11 @@ def processar_maior_valor_causa_por_estado(dataframe):
     }
 
 def processar_valor_condenacao_por_estado(dataframe):
+    colunas_necessarias = ['Valor de causa (R$)','Foro']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     dataframe['Valor de condenação (R$)'] = (dataframe['Valor de condenação (R$)']
                                              .astype(str)
@@ -669,9 +809,13 @@ def processar_valor_condenacao_por_estado(dataframe):
     }
     
 
-
 # Função auxiliar para processar perguntas sobre status (ativos, arquivados, etc.)
 def processar_status(pergunta, dataframe, status):
+    colunas_necessarias = ['Status']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     status_lower = status.lower()
     processos_status = dataframe[dataframe['Status'].str.lower() == status_lower]
     quantidade = processos_status.shape[0]
@@ -697,6 +841,11 @@ def processar_status(pergunta, dataframe, status):
 
 # Função auxiliar para processar perguntas sobre órgãos
 def processar_orgao(dataframe):
+    colunas_necessarias = ['Órgão']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     orgaos = dataframe['Órgão'].str.lower().value_counts().to_dict()
     orgaos_texto = ", ".join([f"{orgao}: {quantidade}" for orgao, quantidade in orgaos.items()])
     return f"Os órgãos estão distribuídos da seguinte forma: {orgaos_texto}.", {
@@ -705,6 +854,12 @@ def processar_orgao(dataframe):
 
 
 def processar_fase(dataframe, pergunta=None):
+    colunas_necessarias = ['Fase']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
     # Converter a coluna 'Fase' para minúsculas para facilitar a comparação
     fases = dataframe['Fase'].str.lower().value_counts().to_dict()
 
@@ -739,11 +894,13 @@ def processar_fase(dataframe, pergunta=None):
     }
 
 
-
 def processar_sentenca(dataframe):
+    colunas_necessarias = ['Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
 
-    if 'Resultado da Sentença' not in dataframe.columns:
-        return "Erro: A coluna 'Resultado da Sentença' não foi encontrada no arquivo de dados.", {}
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+
 
     sentencas = dataframe['Resultado da Sentença'].str.lower().value_counts().to_dict()
 
@@ -764,6 +921,12 @@ def processar_sentenca(dataframe):
 
 
 def processar_valor_acordo(dataframe):
+    colunas_necessarias = ['Valor de acordo (R$)']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
     if 'Valor de acordo (R$)' in dataframe.columns:
 
 
@@ -875,6 +1038,11 @@ def processar_semana(dataframe, coluna, pergunta):
     return f"Não foi possível identificar a semana especificada.", {}
 
 def tratar_pergunta_proximas_audiencias(dataframe):
+    colunas_necessarias = ['Data de Audiência','Vara','Foro', 'Tipo de audiência', 'Envolvidos - Polo Ativo']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
 
@@ -900,6 +1068,12 @@ def tratar_pergunta_proximas_audiencias(dataframe):
 
 
 def processar_processo_mais_antigo(dataframe):
+    colunas_necessarias = ['Data da distribuição']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+
     # Converter a coluna 'Data da distribuição' para o tipo datetime, ignorando erros de conversão
     dataframe['Data da distribuição'] = pd.to_datetime(dataframe['Data da distribuição'], errors='coerce', format='%d/%m/%Y')
 
@@ -930,6 +1104,11 @@ def processar_processo_mais_antigo(dataframe):
         return resposta, {}
 
 def processar_contagem_classe_cnj(df):
+    colunas_necessarias = ['Classe CNJ']
+    valido, colunas_ausentes = verificar_colunas(df, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     if 'Classe CNJ' not in df.columns:
         raise ValueError("A coluna 'Classe CNJ' não está presente no DataFrame fornecido.")
@@ -943,6 +1122,11 @@ def processar_contagem_classe_cnj(df):
     return f"Dos {total}, afirmo que são {trabalhista_count} trabalhistas, {penal_count} penais e {civel_count} cíveis.", {}
 
 def processar_maior_valor_condenacao(df):
+    colunas_necessarias = ['Valor de condenação (R$)','Órgão']
+    valido, colunas_ausentes = verificar_colunas(df, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
 
     if 'Valor de condenação (R$)' not in df.columns:
         raise ValueError("A coluna 'Valor de condenação (R$)' não está presente no DataFrame fornecido.")
@@ -963,45 +1147,58 @@ def processar_maior_valor_condenacao(df):
 
     return f"A sentença mais elevada foi no caso de número {numero_cnj} no valor de {valor_condenacao} em trâmite no {orgao}", {}
 
-def processar_instancia_por_cnj(dataframe):
+def processar_instancia_por_cnj(dataframe, pergunta):
+    colunas_necessarias = ['Instância','Resultado da Sentença']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
     # Preencher valores nulos ou traços na coluna 'Instância' e 'Resultado da Sentença'
     dataframe['Instância'] = dataframe['Instância'].fillna('Sem instância')
     dataframe['Resultado da Sentença'] = dataframe['Resultado da Sentença'].replace('-', 'Sem sentença').fillna('Sem sentença')
 
-    # Mapear valores de "1ª" para "Primeira Instância" e "2ª" para "Segunda Instância"
+    # Mapear valores de "1ª" para "Primeira Instância", etc.
     instancia_map = {
         '1ª': 'Primeira Instância',
         '2ª': 'Segunda Instância',
         '3ª': 'Terceira Instância',
-        
     }
     dataframe['Instância'] = dataframe['Instância'].replace(instancia_map)
 
     # Manter apenas processos com "Sentença Procedente" ou "Sentença Improcedente"
     dataframe = dataframe[dataframe['Resultado da Sentença'].str.contains("Procedente|Improcedente", case=False, na=False)]
 
-    # Filtrar as linhas com números CNJ válidos
-    dataframe = dataframe.dropna(subset=['Número CNJ'])
+    # Identificar a instância solicitada na pergunta
+    if "primeira instancia" in pergunta.lower():
+        instancia_solicitada = "Primeira Instância"
+    elif "segunda instancia" in pergunta.lower():
+        instancia_solicitada = "Segunda Instância"
+    elif "terceira instancia" in pergunta.lower():
+        instancia_solicitada = "Terceira Instância"
+    else:
+        return "Não foi possível identificar a instância solicitada na pergunta.", {}
 
-    # Filtrar processos na "Primeira instância"
-    primeira_instancia = dataframe[dataframe['Instância'] == 'Primeira Instância']
-    total_primeira_instancia = len(primeira_instancia)
+    # Filtrar processos pela instância solicitada
+    processos_instancia = dataframe[dataframe['Instância'] == instancia_solicitada]
+    total_processos = len(processos_instancia)
 
-    # Contar processos com sentença procedente na Primeira Instância
-    procedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Procedente", case=False, na=False)]
+    # Se não houver processos na instância solicitada
+    if total_processos == 0:
+        return f"Não existem processos na {instancia_solicitada}.", {}
+
+    # Contar processos procedentes e improcedentes
+    procedentes = processos_instancia[processos_instancia['Resultado da Sentença'].str.contains("Procedente", case=False, na=False)]
+    improcedentes = processos_instancia[processos_instancia['Resultado da Sentença'].str.contains("Improcedente", case=False, na=False)]
     total_procedentes = len(procedentes)
-
-    # Contar processos com sentença improcedente na Primeira Instância
-    improcedentes = primeira_instancia[primeira_instancia['Resultado da Sentença'].str.contains("Improcedente", case=False, na=False)]
     total_improcedentes = len(improcedentes)
 
-    # Resposta textual para a pergunta "algum deles foram julgados em primeira instância?"
+    # Resposta textual
     resposta = (
-        f"Sim, temos {total_procedentes} processos com sentença procedente na Primeira Instância e "
-        f"{total_improcedentes} processos com sentença improcedente."
+        f"Na {instancia_solicitada}, existem {total_processos} processos no total: "
+        f"{total_procedentes} procedentes e {total_improcedentes} improcedentes."
     )
 
-    # Dados para gráficos
+    # Dados para gráficos ou análises adicionais
     grafico_data = {
         "Sentenças Procedentes": total_procedentes,
         "Sentenças Improcedentes": total_improcedentes,
@@ -1011,8 +1208,11 @@ def processar_instancia_por_cnj(dataframe):
 
 
 def calcular_media_condenacao_julho(df):
-    if 'Valor de condenação (R$)' not in df.columns or 'Data' not in df.columns:
-        raise ValueError("As colunas 'Valor de condenação (R$)' e 'Data' precisam estar presentes no DataFrame fornecido.")
+    colunas_necessarias = ['Valor de condenação (R$)']
+    valido, colunas_ausentes = verificar_colunas(df, colunas_necessarias)
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
 
     # Filtrar as linhas do mês de julho
     df['Data'] = pd.to_datetime(df['Data'], errors='coerce')  # Garantir que a coluna 'Data' esteja no formato datetime
@@ -1039,8 +1239,12 @@ def calcular_media_condenacao_julho(df):
     return {}
 
 
-    
 def tratar_pergunta_audiencias_dezembro(dataframe):
+    colunas_necessarias = ['Data de Audiência']
+    valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
+    if not valido:
+        return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+    
     dataframe['Data de Audiência'] = pd.to_datetime(dataframe['Data de Audiência'], errors='coerce', format='%d/%m/%Y')
     audiencias_dezembro = dataframe[dataframe['Data de Audiência'].dt.month == 12]
     audiencias_dezembro = audiencias_dezembro.sort_values(by='Data de Audiência')
