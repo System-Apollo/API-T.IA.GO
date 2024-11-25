@@ -3677,7 +3677,7 @@ categoria_perguntas['processos_nao_julgados'] = [
     r"Pendentes atualmente hoje base"
 ]
 
-categoria_perguntas['processos_nao_citados'] = [ #erro
+categoria_perguntas['processos_nao_citados'] = [ 
     r"quantos processos ainda nao foram citados",
     r"processos nao citados",
     r"quais processos ainda nao foram citados",

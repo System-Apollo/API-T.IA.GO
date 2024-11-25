@@ -37,18 +37,21 @@ def filtrar_dataframe(pergunta, dataframe):
     if not colunas_relevantes:
         colunas_relevantes = {"Número CNJ", "Classe CNJ", 
                               "Status", "Envolvidos - Polo Ativo", 
-                              "Órgão",'Foro','Data da sentença',
-                              'Data do arquivamento','UF',
-                              'Valor de condenação (R$)',	'Valor de causa (R$)',
-                             ' Data da próxima audiência',	'Data do Última mov.',
-                             'Desfecho','Instância', 'Juízes'																																																																																	
-}
+                              "Órgão", 'Foro', 'Data da sentença',
+                              'Data do arquivamento', 'UF',
+                              'Valor de condenação (R$)', 'Valor de causa (R$)',
+                              'Data da próxima audiência', 'Data do Última mov.',
+                              'Desfecho', 'Instância', 'Juízes'}
 
     # Verificar quais colunas existem no DataFrame
     colunas_existentes = [col for col in colunas_relevantes if col in dataframe.columns]
 
+    # Caso nenhuma coluna seja detectada ou encontrada, envie a base completa
     if not colunas_existentes:
-        return f"A pergunta faz referência a colunas que não estão disponíveis na base de dados: {', '.join(colunas_relevantes)}.", dataframe.head(5)
+        return (
+            f"A pergunta não identificou colunas específicas na base ou elas não estão disponíveis. A base completa será enviada para análise.",
+            dataframe
+        )
 
     # Filtrar colunas existentes
     dataframe_filtrado = dataframe[colunas_existentes]
@@ -87,6 +90,11 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
 
     
     dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
+    if isinstance(dataframe_filtrado, tuple):  # Caso seja necessário enviar a base completa
+        mensagem, dataframe_filtrado = dataframe_filtrado
+        print(mensagem)  # Log para informar que a base completa está sendo enviada
+
+    
     contexto_dataframe = dataframe_filtrado.to_string(index=False)
 
 
