@@ -35,12 +35,12 @@ def filtrar_dataframe(pergunta, dataframe):
 
     # Garantir colunas padrão caso nenhuma palavra-chave seja detectada
     if not colunas_relevantes:
-        colunas_relevantes = {"Número CNJ", "Classe CNJ", 
+        colunas_relevantes = {"Número CNJ", "Classe CNJ","Vara" 
                               "Status", "Envolvidos - Polo Ativo", 
                               "Órgão", 'Foro', 'Data da sentença',
                               'Data do arquivamento', 'UF',
                               'Valor de condenação (R$)', 'Valor de causa (R$)',
-                              'Data da próxima audiência', 'Data do Última mov.',
+                              'Data de Audiência', 'Data do Última mov.',
                               'Desfecho', 'Instância', 'Juízes'}
 
     # Verificar quais colunas existem no DataFrame
@@ -116,4 +116,4 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
         return response.text.strip()
     except Exception as e:
         print(f"Erro ao consultar a API do Gemini: {e}")
-        return "Desculpe, ainda estou aprimorando minha base de conhecimento. Tente novamente em alguns instantes."
+        return "Desculpe, Não consegui localizar esse dados. Tente novamente em alguns instantes."
