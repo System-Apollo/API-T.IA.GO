@@ -6,6 +6,7 @@ from src.models.user import User
 from src.routes.auth import auth_bp
 from src.routes.users import user_bp
 from src.routes.tiago import main_bp
+from src.routes.upload import upload_bp
 from src.utils.config.extensions import db, jwt 
 from src.utils.functions.requests.control import processar_fila
 from datetime import timedelta
@@ -27,6 +28,7 @@ def create_app():
     app.register_blueprint(user_bp, url_prefix='/user')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp, url_prefix='/main')
+    app.register_blueprint(upload_bp, url_prefix='/upload')
 
     @jwt.user_lookup_loader
     def user_lookup_callback(_jwt_headers, jwt_data):
@@ -38,7 +40,7 @@ def create_app():
         user = User.query.filter_by(id=identity).one_or_none()
 
         staff = False
-        if user.email == 'projetos@meirelesefreias.adv.br':
+        if user.email == 'advprojetos@meirelesefreitas.com.br':
             staff = True
 
         claims = {"is_staff": staff}

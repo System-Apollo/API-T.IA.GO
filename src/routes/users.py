@@ -40,7 +40,7 @@ def update_user(email):
     user = User.get_email(email)
 
     try:
-        user.set_username(f"{data['name']} + {data['last_name']}")
+        user.set_username(f"{data['name']} {data['last_name']}")
         user.set_activity(data['activity'])
         user.set_company(data['company'])
         user.set_cpf_cnpj(data['cpf_cnpj'])

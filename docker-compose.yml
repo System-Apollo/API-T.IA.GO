@@ -19,6 +19,8 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
     command: python app.py
+    volumes:
+      - ./src/uploads:/app/src/uploads  # Volume para persistir os arquivos de upload
 
   tiago_db:
     image: postgres:16
@@ -30,7 +32,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5433"
+      - "5433:5433"  # Corrigido para evitar conflito com a porta padrão do PostgreSQL
 
 volumes:
   postgres_data:

@@ -92,7 +92,7 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'transitaram_julgado':
         return processar_transito_julgado(dataframe)
     elif categoria == "instancia_":
-        return processar_instancia_por_cnj(dataframe)
+        return processar_instancia_por_cnj(dataframe, pergunta)
     elif categoria == 'prox_audiencia':
         return tratar_pergunta_proximas_audiencias(dataframe)
     elif categoria == 'audiencia_dezembro':
@@ -151,3 +151,5 @@ def processar_categoria(categoria, dataframe, pergunta):
         return processar_contagem_classe_cnj(dataframe)
     elif categoria == 'valor_sentenca':
         return processar_maior_valor_condenacao(dataframe)
+    elif categoria == 'orgao':
+        return processar_orgao(dataframe)
