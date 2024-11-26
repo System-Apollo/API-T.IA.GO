@@ -1,11 +1,22 @@
 from flask import Blueprint, request, jsonify
 from time import sleep
+import os
+from src.models.file import File  # Importa o modelo File
 
 from src.utils.functions.conversation.question import carregar_dados, processar_pergunta
 from flask_jwt_extended import jwt_required, get_jwt
 
 main_bp = Blueprint('main', __name__)
 
+def obter_base_dados(company):
+    """
+    Busca o arquivo da base de dados para a empresa no banco de dados.
+    """
+    # Busca no banco de dados pelo arquivo associado à empresa
+    file_record = File.query.filter_by(company=company).first()
+    if file_record and os.path.exists(file_record.filepath):  # Verifica se o arquivo existe fisicamente
+        return carregar_dados(file_record.filepath)
+    return None
 
 @main_bp.route('/', methods=['GET'])
 @jwt_required()
@@ -21,15 +32,11 @@ def pergunta():
     user_id = claims.get('user_id')
     company = claims.get('company')
 
-    if company == 'MF Digital Law':
-        df = carregar_dados('dados_falsos_processos_completos.xlsx')
-        
-    elif company == 'Teste':
-        df = carregar_dados('dados_testes_tiago.xlsx')
+    # Carregar a base de dados correspondente
+    df = obter_base_dados(company)
 
-    else:
-        return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"})
-
+    if df is None:
+        return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"}), 400
     # if df is None:
     #     return jsonify({"erro": "Nenhum arquivo carregado!"}), 400
 
@@ -48,3 +55,4 @@ def pergunta():
         "resposta": resposta_texto,  # Retorna o texto para o usuário
         "grafico": grafico_data       # Retorna os dados para o gráfico (pode ser None se não houver)
     })
+
