@@ -8,12 +8,6 @@ from src.utils.config.extensions import db
 upload_bp = Blueprint('upload', __name__)
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Cria a pasta de uploads, se necessário
-# Dicionário para mapear empresas às bases de dados
-BASES_DE_DADOS = {
-    'MF Digital Law': os.path.join(UPLOAD_FOLDER, 'dados_falsos_processos_completos.xlsx'),
-    'Teste': os.path.join(UPLOAD_FOLDER, 'dados_testes_tiago.xlsx'),
-    'André Menescal Advogados': os.path.join(UPLOAD_FOLDER, 'Legal One.xlsx'),
-}
 
 @upload_bp.route('/add', methods=['POST'])
 @jwt_required()

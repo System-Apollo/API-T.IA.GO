@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from time import sleep
 import os
 from src.models.file import File  # Importa o modelo File
+from src.models.user import User  # Adicionado: Importação do modelo User
 
 from src.utils.functions.conversation.question import carregar_dados, processar_pergunta
 from flask_jwt_extended import jwt_required, get_jwt
@@ -31,7 +32,18 @@ def pergunta():
 
     user_id = claims.get('user_id')
     company = claims.get('company')
+    
+    # Buscar o usuário no banco de dados
+    user = User.query.filter_by(id=user_id).first()
 
+    if not user:
+        return jsonify({"erro": "Usuário não encontrado!"}), 404
+
+    # Verificar se o usuário ainda pode fazer requisições
+    if not user.can_make_request():
+        return jsonify({"erro": "Limite de requisições mensais atingido!"}), 403
+
+    
     # Carregar a base de dados correspondente
     df = obter_base_dados(company)
 
@@ -39,7 +51,7 @@ def pergunta():
         return jsonify({"resposta": "Nenhuma base de dados vinculada ao seu usuário. Solicite suporte!"}), 400
     # if df is None:
     #     return jsonify({"erro": "Nenhum arquivo carregado!"}), 400
-
+    
     # Pegar os dados da requisição
     dados = request.get_json()
     pergunta_usuario = dados.get('pergunta', '')
@@ -49,6 +61,13 @@ def pergunta():
 
     # Processar a pergunta diretamente e gerar a resposta
     resposta_texto, grafico_data = processar_pergunta(pergunta_usuario, df, user_id)
+    
+    # Incrementar o número de requisições usadas pelo usuário
+    try:
+        user.increment_requests()
+        user.update_in_db()
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao atualizar requisições: {str(e)}"}), 500
 
     # Retornar a resposta com o texto e os dados do gráfico (se houver)
     return jsonify({

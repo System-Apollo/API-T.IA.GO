@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
-
+from src.utils.functions.requests.scheduler import reset_requests_for_all_users
 from src.database.schema import UserSchema
 from src.models.user import User
 
@@ -31,22 +31,59 @@ def get_all_users():
 @user_bp.put("/update/<string:email>")
 @jwt_required()
 def update_user(email):
-    claims = get_jwt()
+    claims = get_jwt()  # Obter informações do token JWT
     data = request.get_json()
 
-    if not (claims.get("is_staff")):
-        return jsonify({"message": "You are not logged in!"}), 403
+    # Verificar se o usuário atual tem permissão para realizar alterações
+    if not claims.get("is_staff"):
+        return jsonify({"message": "Unauthorized to perform this action!"}), 403
 
+    # Obter o usuário a ser atualizado
     user = User.get_email(email)
 
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
     try:
-        user.set_username(f"{data['name']} {data['last_name']}")
-        user.set_activity(data['activity'])
-        user.set_company(data['company'])
-        user.set_cpf_cnpj(data['cpf_cnpj'])
+        # Atualizar informações gerais do usuário
+        if "name" in data and "last_name" in data:
+            user.set_username(f"{data['name']} {data['last_name']}")
+
+        if "activity" in data:
+            user.set_activity(data['activity'])
+
+        if "company" in data:
+            user.set_company(data['company'])
+
+        if "cpf_cnpj" in data:
+            user.set_cpf_cnpj(data['cpf_cnpj'])
+
+        # Atualizar o papel do usuário (role), somente permitido pelo e-mail autorizado
+        if "role" in data:
+            if data["role"] == "Admin" and claims.get("is_staff"):
+                user.set_role("Admin")  # Permitir atualização para Admin
+            elif data["role"] != "Admin":
+                user.set_role(data["role"])  # Permitir qualquer outro papel
+            else:
+                return jsonify({"message": "Only staff can assign Admin role!"}), 403
 
         user.update_in_db()
 
-        return jsonify({"message": "You have successfully updated!"}), 200
+        return jsonify({"message": "User successfully updated!"}), 200
     except Exception as e:
-        return jsonify({"message": f"error: {str(e)}"}), 403
+        return jsonify({"message": f"Error: {str(e)}"}), 400
+    
+
+@user_bp.post("/reset-requests")
+@jwt_required()
+def reset_requests():
+    claims = get_jwt()
+
+    if not claims.get("is_staff"):
+        return jsonify({"message": "Only staff can reset requests"}), 403
+
+    try:
+        reset_requests_for_all_users()
+        return jsonify({"message": "Requests reset successfully!"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Error resetting requests: {str(e)}"}), 500

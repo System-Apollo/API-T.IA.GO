@@ -33,7 +33,10 @@ def register_user():
         email=data['email'],
         password=data['password'],
         cpf_cnpj=data['cpf_cnpj'],
-        is_activity=False
+        is_activity=False,
+        user_role="Usuario"  # Define o papel padrão
+        
+        
     )
     new_user.save_to_db()
 
@@ -58,6 +61,7 @@ def login_user():
                 {
                     "message": "Login successful",
                     "username": user.username,
+                    "role": user.get_role(),
                     "tokens": {"access_token": access_token, "refresh_token": refresh_token}
                 }
             ), 200
