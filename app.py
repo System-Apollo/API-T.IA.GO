@@ -3,7 +3,7 @@ from flask_cors import CORS
 from threading import Thread
 from src.models.token_blocklist import TokenBlocklist
 from apscheduler.schedulers.background import BackgroundScheduler
-from src.utils.functions.requests.scheduler import reset_requests_for_all_users  # Importa a função
+from src.utils.functions.requests.scheduler import reset_requests_for_all_companies  # Importa a função
 from src.models.user import User
 from src.routes.auth import auth_bp
 from src.routes.users import user_bp
@@ -29,7 +29,7 @@ def create_app():
         
     # Configurar o agendamento do reset mensal
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=reset_requests_for_all_users, trigger="cron", day=1, hour=0, minute=0)  # Todo dia 1 à meia-noite
+    scheduler.add_job(func=reset_requests_for_all_companies, trigger="cron", day=1, hour=0, minute=0)  # Todo dia 1 à meia-noite
     scheduler.start()
 
     app.register_blueprint(user_bp, url_prefix='/user')
@@ -47,17 +47,16 @@ def create_app():
         user = User.query.filter_by(id=identity).one_or_none()
 
         staff = False
-        if user.email == 'advprojetos@meirelesefreitas.com.br':
+        if user and user.email == 'advprojetos@meirelesefreitas.com.br':
             staff = True
 
         claims = {"is_staff": staff}
 
         if user:
             claims["user_id"] = user.id
-            claims["company"] = user.company
+            claims["company"] = user.company.id if user.company else None  # Use o ID da empresa
 
         return claims
-
     @jwt.expired_token_loader
     def expired_token_callback(_jwt_header, jwt_data):
         return jsonify({"message": "Token expired", "error": "token_expired"}), 401

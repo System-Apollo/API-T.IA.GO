@@ -1,6 +1,6 @@
 import unicodedata
 from src.utils.constants.map import categoria_perguntas
-from src.utils.functions.gemini.consult import consultar_gemini_conversacional
+from src.utils.functions.gemini.consult import consultar_gemini_conversacional, consultar_tiago_ia
 from src.utils.functions.processing.processing import *
 
 #Histórico de Conversa transformado em um Objeto
@@ -71,7 +71,7 @@ def processar_pergunta(pergunta, dataframe, user_id):
                 return resultado, grafico_data
 
     # Caso não encontre uma categoria, utilizar a API de conversação
-    chatgemini_resposta = consultar_gemini_conversacional(pergunta, dataframe, user_id)
+    chatgemini_resposta = consultar_tiago_ia(pergunta, dataframe, user_id)
 
     # Adicionar ao histórico
     historico_conversa[user_id].append({"pergunta": pergunta, "resposta_tiago": chatgemini_resposta})

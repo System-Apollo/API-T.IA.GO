@@ -10,30 +10,28 @@ def generate_uuid():
 
 class User(db.Model):
     __tablename__ = 'users'
-
-    # Definição das colunas do banco de dados
+    
     id = db.Column(db.String, primary_key=True, default=generate_uuid)
     username = db.Column(db.String(64), index=True)
-    company = db.Column(db.String(64), index=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password = db.Column(db.String(512))
     cpf_cnpj = db.Column(db.String(18), unique=True)
     is_activity = db.Column(db.Boolean, default=False)
-    user_role = db.Column(db.String(50), default="Usuario")
-    request_limit = db.Column(db.Integer, default=200)  # Limite de requisições por mês
-    requests_used = db.Column(db.Integer, default=0)    # Requisições usadas no mês
+    user_role = db.Column(db.String(50), default="Teste")
 
-    def __init__(self, name, last_name, company, email, password, cpf_cnpj, is_activity=False, request_limit=200, user_role="Usuario"):
+    # Relacionamento com a tabela 'companies'
+    company_id = db.Column(db.String, db.ForeignKey('companies.id'), nullable=False)
+    company = db.relationship('Company', backref='company_users', lazy=True)
+
+    def __init__(self, name, last_name, company_id, email, password, cpf_cnpj, is_activity=False, user_role="Usuario"):
         """Construtor para inicializar um novo usuário."""
         self.id = generate_uuid()
         self.username = f"{name} {last_name}"
-        self.company = company
+        self.company_id = company_id
         self.email = email
         self.password = generate_password_hash(password)
         self.cpf_cnpj = cpf_cnpj
         self.is_activity = is_activity
-        self.request_limit = request_limit
-        self.requests_used = 0
         self.user_role = user_role
 
     def __repr__(self):
@@ -50,9 +48,9 @@ class User(db.Model):
         return check_password_hash(self.password, password)
 
     # Métodos para atividade
-    def set_activity(self, activity):
+    def set_activity(self, is_activity):
         """Ativa ou desativa o usuário."""
-        self.is_activity = activity
+        self.is_activity = is_activity
 
     def get_activity(self):
         """Retorna o status de atividade do usuário."""
@@ -67,15 +65,6 @@ class User(db.Model):
         """Define um novo nome de usuário."""
         self.username = username
 
-    # Métodos para empresa
-    def get_company(self):
-        """Obtém o nome da empresa."""
-        return self.company
-
-    def set_company(self, company):
-        """Define uma nova empresa para o usuário."""
-        self.company = company
-
     # Métodos para CPF/CNPJ
     def get_cpf_cnpj(self):
         """Obtém o CPF ou CNPJ do usuário."""
@@ -84,27 +73,15 @@ class User(db.Model):
     def set_cpf_cnpj(self, cpf_cnpj):
         """Define um novo CPF ou CNPJ para o usuário."""
         self.cpf_cnpj = cpf_cnpj
-        
-    def set_role(self, role):
+
+    def set_role(self, user_role):
         """Define o papel do usuário."""
-        self.user_role = role
+        self.user_role = user_role
 
     def get_role(self):
         """Obtém o papel do usuário."""
         return self.user_role
-
-    # Métodos para controle de requisições
-    def can_make_request(self):
-        """Verifica se o usuário ainda pode fazer requisições."""
-        return self.requests_used < self.request_limit
-
-    def increment_requests(self):
-        """Incrementa o número de requisições usadas."""
-        self.requests_used += 1
-
-    def reset_requests(self):
-        """Reseta o número de requisições usadas para zero."""
-        self.requests_used = 0
+    
 
     # Métodos de consulta
     @classmethod

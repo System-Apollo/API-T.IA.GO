@@ -1,8 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
-from src.utils.functions.requests.scheduler import reset_requests_for_all_users
 from src.database.schema import UserSchema
 from src.models.user import User
+from src.models.company import Company
+from src.utils.config.extensions import db
 
 user_bp = Blueprint('user', __name__)
 
@@ -14,13 +15,18 @@ def get_all_users():
     if claims.get("is_staff"):
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 10, type=int)
-        users = User.query.paginate(page=page, per_page=per_page)
-        result = UserSchema(many=True).dump(users)
+        users_paginated = User.query.paginate(page=page, per_page=per_page)
+        
+        users_with_context = []
+        for user in users_paginated.items:
+            company = user.company  # Acessa a empresa relacionada
+            schema = UserSchema(context={'company': company})  # Adiciona o contexto
+            users_with_context.append(schema.dump(user))
 
         return (
             jsonify(
                 {
-                    'users': result
+                    'users': users_with_context
                 }
             )
         )
@@ -49,28 +55,39 @@ def update_user(email):
         if "name" in data and "last_name" in data:
             user.set_username(f"{data['name']} {data['last_name']}")
 
-        if "activity" in data:
-            user.set_activity(data['activity'])
-
-        if "company" in data:
-            user.set_company(data['company'])
+        # Atualizar atividade
+        if "is_activity" in data:
+            # Converta o valor para booleano explicitamente
+            is_active = data["is_activity"] in [True, "true", "True", 1, "1"]
+            user.set_activity(is_active)
 
         if "cpf_cnpj" in data:
             user.set_cpf_cnpj(data['cpf_cnpj'])
 
-        # Atualizar o papel do usuário (role), somente permitido pelo e-mail autorizado
-        if "role" in data:
-            if data["role"] == "Admin" and claims.get("is_staff"):
-                user.set_role("Admin")  # Permitir atualização para Admin
-            elif data["role"] != "Admin":
-                user.set_role(data["role"])  # Permitir qualquer outro papel
-            else:
-                return jsonify({"message": "Only staff can assign Admin role!"}), 403
+        if "user_role" in data:
+            user.set_role(data['user_role'])
+            print(f"Atualizando user_role para: {user.get_role()}")# Atualiza diretamente
 
-        user.update_in_db()
+        # Atualizar informações da empresa associada
+        if "company_name" in data:
+            company = user.company  # Relacionamento definido no modelo
+            if not company:
+                return jsonify({"message": "Company not found"}), 404
+            company.set_company_name(data["company_name"])
+
+        if "limit_requests" in data:
+            company = user.company
+            if not company:
+                return jsonify({"message": "Company not found"}), 404
+            company.set_limit_requests(int(data["limit_requests"]))
+        
+
+        # Salvar alterações no banco
+        db.session.commit()
 
         return jsonify({"message": "User successfully updated!"}), 200
     except Exception as e:
+        db.session.rollback()
         return jsonify({"message": f"Error: {str(e)}"}), 400
     
 

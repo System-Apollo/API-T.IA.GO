@@ -208,3 +208,66 @@ def consultar_gemini_conversacional(pergunta, dataframe, user_id):
     except Exception as e:
         print(f"Erro ao consultar a API do Vertex AI: {e}")
         return "Desculpe, estamos passando por uma manutenção em nossa IA. Por favor, tente novamente mais tarde."
+    
+# import requests
+# import json   
+# def consultar_tiago_ia(pergunta, dataframe, user_id):
+#     from src.utils.functions.conversation.question import historico_conversa
+#     """
+#     Conecta à IA personalizada via endpoint do Ngrok para responder à pergunta fornecida.
+
+#     :param pergunta: Pergunta do usuário.
+#     :param contexto: Contexto adicional ou histórico (opcional).
+#     :param user_id: ID do usuário para referência (opcional).
+#     :return: Resposta da IA.
+#     """
+#      # Obter histórico do usuário
+#     user = User.query.filter_by(id=user_id).first()
+#     historico_usuario = historico_conversa.get(user_id, [])
+#     contexto_conversa = (
+#         "\n".join([f"{msg['pergunta']}: {msg['resposta_tiago']}" for msg in historico_usuario[-3:]])
+#         if historico_usuario
+#         else "Nenhum histórico de conversa disponível."
+#     )
+#     # Filtrar DataFrame com base na pergunta
+#     dataframe_filtrado = filtrar_dataframe(pergunta, dataframe)
+#     if isinstance(dataframe_filtrado, tuple):  # Base completa caso nenhuma coluna específica seja encontrada
+#         mensagem, dataframe_filtrado = dataframe_filtrado
+#         print(mensagem)
+
+#     # Transformar DataFrame em string
+#     contexto_dataframe = dataframe_filtrado.to_string(index=False)
+#     url = "https://b370-187-32-212-210.ngrok-free.app/api/generate"
+
+#     prompt = (f"Usuário que você está conversando (seja gentil com ele(a)): {user.username}\n\n"
+#               f"Use saudações com esse usuário quando for requisitado. "
+#               f"Contexto da última interação (use apenas como referência se for relevante): {contexto_conversa}\n\n"
+#               f"Dados disponíveis: {contexto_dataframe}\n\n"
+#               f"Responda apenas à pergunta atual, sem repetir respostas ou saudações anteriores. "
+#               f"Se for solicitado por informações específicas, forneça diretamente, sem introduções ou repetições.\n\n"
+#               f"Pergunta do usuário: {pergunta}")
+
+#     payload = {
+#         "model": "tiago-assistant:alpha",
+#         "prompt": prompt
+#     }
+#     print(payload)
+
+#     try:
+#         response = requests.post(url, json=payload)
+
+#         # Verifica o status da resposta
+#         if response.status_code != 200:
+#             return f"Erro ao consultar a IA: {response.status_code} - {response.text}"
+
+#         # Verifica o tipo de conteúdo retornado
+#         if response.headers.get('Content-Type') == 'application/json':
+#             return response.json().get("response", "Nenhuma resposta foi gerada.")
+#         else:
+#             # Processa resposta no formato streaming de linhas
+#             lines = response.text.strip().split('\n')
+#             responses = [json.loads(line).get("response", "") for line in lines if line.strip()]
+#             return ''.join(responses) if responses else "Nenhuma resposta válida foi gerada."
+
+#     except requests.exceptions.RequestException as e:
+#         return print(f'Erro IA tiago {e}')
