@@ -22,7 +22,7 @@ auth_bp = Blueprint('auth', __name__)
 def register_user():
     data = request.get_json()
 
-    required_fields = ['name', 'last_name', 'company', 'email', 'password', 'cpf_cnpj']
+    required_fields = ['name', 'last_name', 'company_name', 'email', 'password', 'cpf_cnpj']
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -43,7 +43,7 @@ def register_user():
         return jsonify({"error": "Email or CPF/CNPJ already exists"}), 409
     
     # Verificar se a empresa já existe; se não, criar uma nova
-    company_name = data['company']
+    company_name = data['company_name']
     company = Company.query.filter_by(name=company_name).first()
     if not company:
         company = Company(name=company_name)

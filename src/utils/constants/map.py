@@ -558,7 +558,7 @@ categoria_perguntas['estado_maior_valor_causa'] = [
     r"Maior lider $ estado causa"
 ]
 
-categoria_perguntas['prox_audiencia'] = [ #error
+categoria_perguntas['prox_audiencia'] = [
     r"sao minhas proximas audiencias",
     r"Quando sera a minha proxima audiencia",
     r"proximas audiencias agendadas",
@@ -3898,6 +3898,8 @@ categoria_perguntas['processo_mais_antigo'] = [
 
 categoria_perguntas['classe_cnj'] = [
     r"processos cadastrados sao trabalhistas",
+    r"processos por classe",
+    r"divididos a classe cnj",
     r"divisao da classe cnj",
     r"numero total de processos trabalhistas na base",
     r"Me informe a quantidade de processos trabalhistas registrados",
