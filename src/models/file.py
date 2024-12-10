@@ -6,13 +6,16 @@ class File(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), nullable=False)  # Nome do arquivo
-    company = db.Column(db.String(64), nullable=False)    # Empresa associada
     filepath = db.Column(db.String(255), nullable=False)  # Caminho do arquivo
     created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Data de upload
 
-    def __init__(self, filename, company, filepath):
+    # Relacionamento com a tabela 'companies'
+    company_id = db.Column(db.String, db.ForeignKey('companies.id'), nullable=False)
+    company = db.relationship('Company', backref='files')  # Relacionamento
+
+    def __init__(self, filename, company_id, filepath):
         self.filename = filename
-        self.company = company
+        self.company_id = company_id
         self.filepath = filepath
 
     def save_to_db(self):

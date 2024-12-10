@@ -1,4 +1,7 @@
 from flask import Blueprint, jsonify, request
+from src.models.company import Company
+from src.utils.functions.requests.validators import validar_cpf, validar_cnpj, validar_email
+from src.utils.config.extensions import db
 
 from flask_jwt_extended import (
     create_access_token,
@@ -19,21 +22,43 @@ auth_bp = Blueprint('auth', __name__)
 def register_user():
     data = request.get_json()
 
-    required_fields = ['name', 'last_name', 'company', 'email', 'password', 'cpf_cnpj']
+    required_fields = ['name', 'last_name', 'company_name', 'email', 'password', 'cpf_cnpj']
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
-    if User.get_email(data['email']) or User.query.filter_by(cpf_cnpj=data['cpf_cnpj']).first():
+    # Converter CPF/CNPJ para string
+    cpf_cnpj = str(data['cpf_cnpj'])
+    
+    # Validação de CPF ou CNPJ
+    if not (validar_cpf(cpf_cnpj) or validar_cnpj(cpf_cnpj)):
+        return jsonify({"error": "Invalid CPF or CNPJ"}), 400
+
+    # Validação de e-mail
+    email = data['email']
+    if not validar_email(email):
+        return jsonify({"error": "Invalid email format"}), 400
+
+    # Verificar duplicidade de e-mail e CPF/CNPJ
+    if User.get_email(email) or User.query.filter_by(cpf_cnpj=cpf_cnpj).first():
         return jsonify({"error": "Email or CPF/CNPJ already exists"}), 409
+    
+    # Verificar se a empresa já existe; se não, criar uma nova
+    company_name = data['company_name']
+    company = Company.query.filter_by(name=company_name).first()
+    if not company:
+        company = Company(name=company_name)
+        db.session.add(company)
+        db.session.commit()
 
     new_user = User(
         name=data['name'],
         last_name=data['last_name'],
-        company=data['company'],
+        company_id=company.id,  # Relacione o usuário à empresa
         email=data['email'],
         password=data['password'],
         cpf_cnpj=data['cpf_cnpj'],
-        is_activity=False
+        is_activity=False,
+        user_role="Teste"
     )
     new_user.save_to_db()
 
@@ -58,6 +83,7 @@ def login_user():
                 {
                     "message": "Login successful",
                     "username": user.username,
+                    "role": user.get_role(),
                     "tokens": {"access_token": access_token, "refresh_token": refresh_token}
                 }
             ), 200
