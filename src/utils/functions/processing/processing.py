@@ -1006,13 +1006,27 @@ def processar_contagem_classe_cnj(df):
         raise ValueError("A coluna 'Classe CNJ' não está presente no DataFrame fornecido.")
 
     total = int(df["Classe CNJ"].count())
-    trabalhista_count = df['Classe CNJ'].str.contains('Ação Trabalhista', case=False, na=False).sum()
-    penal_count = df['Classe CNJ'].str.contains(['Ação Penal'], case=False, na=False).sum()
-    civel_count = df['Classe CNJ'].str.contains(['Ação Civel','Processo Cível', 'Cível'], case=False, na=False).sum()
-    jec_count = df['Classe CNJ'].str.contains(['Ação Jec', 'Processo Juizado especial', 'JEC'], case=False, na=False).sum()
+    trabalhista_count = int(df['Classe CNJ'].str.contains(r'Ação Trabalhista', case=False, na=False).sum())
+    penal_count = int(df['Classe CNJ'].str.contains(r'Ação Penal', case=False, na=False).sum())
+    civel_count = int(df['Classe CNJ'].str.contains(r'(Ação Civel|Processo Cível|Cível)', case=False, na=False).sum())
+    jec_count = int(df['Classe CNJ'].str.contains(r'(Ação Jec|Processo Juizado especial|JEC)', case=False, na=False).sum())
 
+    resposta = f"""
+    O total de processos encontrados é {total}. Aqui está a divisão por classes:
+    - Trabalhistas: {trabalhista_count}
+    - Penais: {penal_count}
+    - Cíveis: {civel_count}
+    - Juizado Especial (JEC): {jec_count}
+    """
 
-    return f"Dos {total}, afirmo que são {trabalhista_count} trabalhistas, {penal_count} penais, {jec_count} jec e {civel_count} cíveis.", {}
+    # Converta para tipos compatíveis com JSON antes de retornar
+    return resposta.strip(), {
+        "total": total,
+        "trabalhista": trabalhista_count,
+        "penal": penal_count,
+        "civel": civel_count,
+        "jec": jec_count
+    }
 
 def processar_maior_valor_condenacao(df):
     colunas_necessarias = ['Valor de condenação (R$)','Órgão']
@@ -1046,10 +1060,37 @@ def processar_orgao(dataframe):
 
     if not valido:
         return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
-    orgaos = dataframe['Órgão'].str.lower().value_counts().to_dict()
-    orgaos_texto = ", ".join([f"{orgao}: {quantidade}" for orgao, quantidade in orgaos.items()])
-    return f"Os órgãos estão distribuídos da seguinte forma: {orgaos_texto}.", {
-        "orgaos": orgaos
+
+    if 'Órgão' not in dataframe.columns:
+        raise ValueError("A coluna 'Órgão' não está presente no DataFrame fornecido.")
+
+    # Contagem de órgãos
+    orgaos = dataframe['Órgão'].str.strip().str.lower().value_counts().to_dict()
+
+    # Órgãos mais e menos frequentes
+    orgao_mais_frequente = max(orgaos, key=orgaos.get, default=None)
+    orgao_menos_frequente = min(orgaos, key=orgaos.get, default=None)
+
+    # Dados estruturados para gráficos
+    dados_grafico = {
+        "labels": list(orgaos.keys()),
+        "values": list(orgaos.values())
+    }
+
+    # Resumo textual
+    resumo = (
+        f"Os órgãos estão distribuídos da seguinte forma:\n"
+        f"- Órgão mais frequente: {orgao_mais_frequente.capitalize()} ({orgaos[orgao_mais_frequente]} ocorrências).\n"
+        f"- Órgão menos frequente: {orgao_menos_frequente.capitalize()} ({orgaos[orgao_menos_frequente]} ocorrências).\n"
+        f"Total de órgãos diferentes: {len(orgaos)}.\n"
+    )
+
+    return resumo.strip(), {
+        "orgao_mais_frequente": orgao_mais_frequente,
+        "orgao_menos_frequente": orgao_menos_frequente,
+        "total_orgaos": len(orgaos),
+        "distribuicao_orgaos": orgaos,
+        "grafico": dados_grafico
     }
 
 def extrair_comarca(foro):
