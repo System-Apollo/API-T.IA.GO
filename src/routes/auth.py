@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from src.models.company import Company
 from src.utils.functions.requests.validators import validar_cpf, validar_cnpj, validar_email
 from src.utils.config.extensions import db
+from src.utils.functions.requests.sendmail import send_welcome_email
 
 from flask_jwt_extended import (
     create_access_token,
@@ -62,6 +63,10 @@ def register_user():
     )
     new_user.save_to_db()
 
+   # Enviar notificação de boas-vindas
+    send_welcome_email(new_user)
+   
+    
     return jsonify({"message": "User created", "username": new_user.username}), 201
 
 @auth_bp.post("/login")
@@ -126,3 +131,4 @@ def whoami():
             }
         }
     )
+

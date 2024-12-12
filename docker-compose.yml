@@ -18,13 +18,15 @@ services:
       - FLASK_SQLALCHEMY_ECHO=${FLASK_SQLALCHEMY_ECHO}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/gen-lang-client-0549477230-23a4e460f7bf.json
-      - VERTEX_AI_PROJECT_ID=gen-lang-client-0549477230
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/gen-lang-client-0549477230-05ff080375a7.json
+      - VERTEX_AI_PROJECT_ID=${VERTEX_AI_PROJECT_ID}
       - VERTEX_AI_LOCATION=southamerica-east1
+      - CREDENCIAL_GMAIL_USER=${CREDENCIAL_GMAIL_USER}
+      - CREDENCIAL_GMAIL_PASSWORD=${CREDENCIAL_GMAIL_PASSWORD}
     command: python app.py
     volumes:
       - ./src/uploads:/app/src/uploads  # Volume para persistir os arquivos de upload
-      - ./src/path/gen-lang-client-0549477230-23a4e460f7bf.json:/app/gen-lang-client-0549477230-23a4e460f7bf.json
+      - ./src/path/gen-lang-client-0549477230-05ff080375a7.json:/app/gen-lang-client-0549477230-05ff080375a7.json
 
   tiago_db:
     image: postgres:16
