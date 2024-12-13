@@ -3,7 +3,9 @@ from flask_jwt_extended import jwt_required, get_jwt
 from src.database.schema import UserSchema
 from src.models.user import User
 from src.models.company import Company
+from src.utils.functions.requests.scheduler import reset_requests_for_all_companies
 from src.utils.config.extensions import db
+
 
 user_bp = Blueprint('user', __name__)
 
@@ -90,7 +92,31 @@ def update_user(email):
         db.session.rollback()
         return jsonify({"message": f"Error: {str(e)}"}), 400
     
+@user_bp.delete("/delete/<string:email>")
+@jwt_required()
+def delete_user(email):
+    claims = get_jwt()
 
+    # Verificar se o usuário tem permissão para deletar
+    if not claims.get("is_staff"):
+        return jsonify({"message": "Unauthorized to delete users!"}), 403
+
+    # Buscar o usuário pelo e-mail
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        return jsonify({"message": "User not found!"}), 404
+
+    try:
+        # Excluir o usuário do banco de dados
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"message": f"User with email {email} successfully deleted!"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"An error occurred while deleting the user: {str(e)}"}), 500
+    
+    
 @user_bp.post("/reset-requests")
 @jwt_required()
 def reset_requests():
@@ -100,7 +126,7 @@ def reset_requests():
         return jsonify({"message": "Only staff can reset requests"}), 403
 
     try:
-        reset_requests_for_all_users()
+        reset_requests_for_all_companies()
         return jsonify({"message": "Requests reset successfully!"}), 200
     except Exception as e:
         return jsonify({"error": f"Error resetting requests: {str(e)}"}), 500
