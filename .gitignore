@@ -5,4 +5,5 @@ instance/
 env/
 .venv
 .idea
-./path
+src/path/gen-lang-client-0549477230-05ff080375a7.json
+src/uploads/

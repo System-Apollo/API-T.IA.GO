@@ -114,7 +114,12 @@ def processar_categoria(categoria, dataframe, pergunta):
     elif categoria == 'sentencas':
         return processar_sentenca(dataframe, pergunta)
     elif categoria == 'assuntos_recorrentes':
-        return processar_assuntos_recorrentes(dataframe)
+        # Verifica se a pergunta solicita o total de registros
+        if "total" in pergunta.lower() or "todos" in pergunta.lower():
+            resposta, dados = processar_assuntos_recorrentes(dataframe, incluir_totais=True)
+        else:
+            resposta, dados = processar_assuntos_recorrentes(dataframe)
+        return resposta, dados
     elif categoria == 'tribunal_acoes_convencoes':
         return processar_tribunal_acoes_convenções(dataframe)
     elif categoria == 'rito_sumarisimo':
