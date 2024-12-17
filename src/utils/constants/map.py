@@ -2010,6 +2010,7 @@ categoria_perguntas['valor_sentenca'] = [
 
 categoria_perguntas['assuntos_recorrentes'] = [
     r"assuntos mais recorrentes",
+    r"Quais assuntos dos processos",
     r"os assuntos mais recorrentes",
     r"assuntos mais frequentes",
     r"os assuntos mais frequentes",

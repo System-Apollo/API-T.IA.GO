@@ -7,60 +7,26 @@
 # RPD = 1500
 
 def filtrar_dataframe(pergunta, dataframe):
-    # Mapeamento de palavras-chave para colunas
-    mapa_colunas = {
-        "envolvido": ["Advogados polo ativo", "Advogados polo passivo"],
-        "cnj": ["Número CNJ"],
-        "assunto": ["Assuntos"],
-        "classe": ["Classe CNJ"],
-        "foro": ["Foro"],
-        "data": [
-            "Data da distribuição", "Data de cadastro", "Data de recurso",
-            "Data do acórdão", "Data de Sessão de Julgamento", "Data da última audiência realizada",
-            "Data da próxima audiência", "Data do último recurso apresentado"
-        ],
-        "valor": ["Valor de acordo (R$)", "Valor de causa (R$)", "Valor de condenação (R$)", "Valor de custas (R$)"],
-        "resultado": ["Resultado da Sentença"],
-        "status": ["Status"],
-        "rito": ["Rito"],
-        "instância": ["Instância"],
-        "teses": ["Teses de Defesa"]
-    }
+    # Colunas padrão a serem retornadas
+    colunas_padrao = [
+        "Número CNJ", "Classe CNJ", "Vara", "Status", "Envolvidos - Polo Ativo",
+        "Órgão", "Foro", "Data da sentença", "Data do arquivamento", "UF",
+        "Valor de condenação (R$)", "Valor de causa (R$)", "Data de Audiência",
+        "Data do Última mov.", "Desfecho", "Instância", "Juízes"
+    ]
+    
+    # Verificar quais colunas padrão existem no DataFrame
+    colunas_existentes = [col for col in colunas_padrao if col in dataframe.columns]
 
-    # Identificar colunas relevantes com base na pergunta
-    colunas_relevantes = set()
-    for palavra, colunas in mapa_colunas.items():
-        if palavra in pergunta.lower():
-            colunas_relevantes.update(colunas)
-
-    # Garantir colunas padrão caso nenhuma palavra-chave seja detectada
-    if not colunas_relevantes:
-        colunas_relevantes = {"Número CNJ", "Classe CNJ","Vara" 
-                              "Status", "Envolvidos - Polo Ativo", 
-                              "Órgão", 'Foro', 'Data da sentença',
-                              'Data do arquivamento', 'UF',
-                              'Valor de condenação (R$)', 'Valor de causa (R$)',
-                              'Data de Audiência', 'Data do Última mov.',
-                              'Desfecho', 'Instância', 'Juízes'}
-
-    # Verificar quais colunas existem no DataFrame
-    colunas_existentes = [col for col in colunas_relevantes if col in dataframe.columns]
-
-    # Caso nenhuma coluna seja detectada ou encontrada, envie a base completa
+    # Caso nenhuma coluna padrão seja encontrada, retorna a base completa
     if not colunas_existentes:
         return (
-            f"A pergunta não identificou colunas específicas na base ou elas não estão disponíveis. A base completa será enviada para análise.",
+            "Nenhuma das colunas padrão foi encontrada na base. A base completa será enviada para análise.",
             dataframe
         )
-
-    # Filtrar colunas existentes
+    
+    # Filtrar DataFrame apenas com as colunas existentes
     dataframe_filtrado = dataframe[colunas_existentes]
-
-    # Filtrar linhas com base nas palavras-chave presentes na pergunta
-    palavras_chave = pergunta.split()
-    dataframe_filtrado = dataframe_filtrado[
-        dataframe_filtrado.apply(lambda row: any(str(value).lower() in pergunta.lower() for value in row), axis=1)
-    ]
 
     return dataframe_filtrado
 
