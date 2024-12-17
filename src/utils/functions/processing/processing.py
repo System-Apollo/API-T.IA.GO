@@ -512,27 +512,46 @@ def processar_sentenca(dataframe, pergunta):
         sentencas_abreviadas.keys()), {
         "sentencas": sentencas_abreviadas
     }
-# Função para processar os assuntos mais recorrentes
-def processar_assuntos_recorrentes(dataframe):
+        
+def processar_assuntos_recorrentes(dataframe, incluir_totais=False):
+    """
+    Processa os assuntos mais recorrentes e retorna os dois principais ou todos com totais.
+    
+    Args:
+        dataframe (DataFrame): Dados contendo a coluna "Assuntos".
+        incluir_totais (bool): Se True, inclui o total geral de registros.
+        
+    Returns:
+        str: Texto formatado com os assuntos mais recorrentes.
+        dict: Dados com todos os assuntos e suas frequências.
+    """
     colunas_necessarias = ['Assuntos']
     valido, colunas_ausentes = verificar_colunas(dataframe, colunas_necessarias)
 
     if not valido:
         return f"Seus dados ainda são para testes. A coluna {', '.join(colunas_ausentes)} não está disponível.", {}
+
     # Contar a frequência dos assuntos na coluna "Assuntos"
     assuntos = dataframe['Assuntos'].str.lower().value_counts().to_dict()
+
+    if not assuntos:
+        return "Não há dados disponíveis para os assuntos.", {}
 
     # Abreviar os nomes dos assuntos
     assuntos_abreviados = {abreviar_assuntos(assunto): quantidade for assunto, quantidade in assuntos.items()}
 
-    # Ordenar os assuntos pela quantidade e pegar os 2 primeiros
+    # Preparar resposta para os 2 mais recorrentes
     dois_mais_recorrentes = dict(list(assuntos_abreviados.items())[:2])
-
-    # Preparar a resposta para os 2 mais recorrentes
     assuntos_texto = ", ".join([f"{assunto}: {quantidade}" for assunto, quantidade in dois_mais_recorrentes.items()])
-    return f"Os dois assuntos mais recorrentes são: {assuntos_texto}.", {
-        "assuntos": assuntos_abreviados  # Enviar todos para o gráfico com abreviações
-    }
+
+    # Verificar se a pergunta solicita totais
+    if incluir_totais:
+        total = sum(assuntos.values())
+        return (f"Os dois assuntos mais recorrentes são: {assuntos_texto}. Total de registros: {total}.", 
+                {"assuntos": assuntos_abreviados, "total_registros": total})
+
+    return (f"Os dois assuntos mais recorrentes são: {assuntos_texto}.", 
+            {"assuntos": assuntos_abreviados})
 
 def processar_tribunal_acoes_convenções(dataframe):
     colunas_necessarias = ['Assuntos','Órgão']
